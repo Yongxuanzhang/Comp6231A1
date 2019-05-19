@@ -49,7 +49,7 @@ public class Client{
         
         Client client = new Client(1099,"ServerOperation");
         client.start();
-        Client client2 = new Client(2002,"ServerOperation3");
+        Client client2 = new Client(2002,"ServerOperation");
         client2.start();
         
 

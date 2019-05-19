@@ -56,7 +56,7 @@ public class CustomerClient {
         
         //CustomerClient  client = new CustomerClient (1099,"ServerOperation");
         //client.start();
-        CustomerClient  client2 = new CustomerClient (2002,"CustomerOperation");
+        CustomerClient  client2 = new CustomerClient (1099,"CustomerOperation");
         client2.start();
         
 

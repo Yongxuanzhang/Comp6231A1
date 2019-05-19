@@ -9,30 +9,30 @@
 	import java.rmi.server.UnicastRemoteObject;
 	import java.util.HashMap;
 
-		public class MTLServer extends Server implements ServerOperation, CustomerOperation {
+		public class OTAServer extends Server implements ServerOperation, CustomerOperation {
 
 		
 		private Registry registry;
-		private HashMap<String,HashMap<String,String>> mtlrecord=new HashMap<String,HashMap<String,String>>();
+		private HashMap<String,HashMap<String,String>> otarecord=new HashMap<String,HashMap<String,String>>();
 		private String Location;
 		
 	    public static void main(String args[]) {
 
-	    	MTLServer server = new MTLServer();
+	    	OTAServer server = new OTAServer();
     		server.start();
 
 	    }
 
-	    private MTLServer() {
-	    	recordSetup(mtlrecord);
-	    	Location="MTL";
+	    private OTAServer() {
+	    	recordSetup(otarecord);
+	    	Location="OTA";
 	    }
 
 	    public void start() {
     	
 	        try {
-	        	MTLServer obj = new MTLServer();
-	        	MTLServer obj_customer = new MTLServer();
+	        	OTAServer obj = new OTAServer();
+	        	OTAServer obj_customer = new OTAServer();
 	         
 	        	ServerOperation stub_Manager = (ServerOperation) UnicastRemoteObject.exportObject(obj, 0);
 	            CustomerOperation stub_customer = (CustomerOperation) UnicastRemoteObject.exportObject(obj_customer, 2);
@@ -49,7 +49,7 @@
 	            registry.rebind("CustomerOperation", stub_customer);
 	            
 	            
-	            System.err.println("MTLServer ready");
+	            System.err.println("OTAServer ready");
 	            
 	            
 	        } catch (Exception e) {
@@ -64,11 +64,11 @@
 		public boolean removeEvent(String eventID, String eventType) {
 			// TODO Auto-generated method stub
 			HashMap<String,String> temp=new HashMap<String,String>();
-			temp.put(eventID,mtlrecord.get(eventType).get(eventID));
+			temp.put(eventID,otarecord.get(eventType).get(eventID));
 					
-			mtlrecord.remove(eventID, temp);
+			otarecord.remove(eventID, temp);
 			
-			System.out.println(mtlrecord.get(eventType).get(eventID));
+			System.out.println(otarecord.get(eventType).get(eventID));
 			return false;
 		}
 
@@ -79,9 +79,9 @@
 			HashMap<String,String> rec=new HashMap<String,String>();
 					rec.put(eventID, bookingCapacity);
 					
-			mtlrecord.put(eventType, rec);
+			otarecord.put(eventType, rec);
 			
-			System.out.println(mtlrecord.get(eventType).get(eventID));
+			System.out.println(otarecord.get(eventType).get(eventID));
 			
 			return false;
 		}
@@ -118,7 +118,7 @@
 		}
 		
 		public HashMap<String,HashMap<String,String>> getRecord(){
-			return mtlrecord;
+			return otarecord;
 		}
 		
 	}
