@@ -61,7 +61,7 @@ public class ManagerClient {
         String host = (args.length < 1) ? null : args[0];
         
  
-        ManagerClient client2 = new ManagerClient(2002,"ManagerOperation");
+        ManagerClient client2 = new ManagerClient(2002,"TORManagerOperation");
         client2.start();
         
 

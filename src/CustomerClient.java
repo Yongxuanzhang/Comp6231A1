@@ -63,7 +63,7 @@ public class CustomerClient {
         CustomerClient  client3 = new CustomerClient ("TORM2345",2004,"TORCustomerOperation");
         client3.start();
         */
-        CustomerClient  client4 = new CustomerClient ("TORM2345",2005,"MTLCustomerOperation");
+        CustomerClient  client4 = new CustomerClient ("TORM2345",2004,"TORCustomerOperation");
         client4.start();
         
     }

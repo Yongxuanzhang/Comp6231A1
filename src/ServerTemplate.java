@@ -14,7 +14,7 @@
 
 	public class ServerTemplate implements ServerOperation, CustomerOperation {
 
-	
+	//MTL2002;OTA2003;TOR2004
 	private Registry registry;
 	private HashMap<String,HashMap<String,Integer>> localRecord=new HashMap<String,HashMap<String,Integer>>();
 	private String location;
@@ -126,7 +126,7 @@
 		
 		
 		
-		System.out.println("MTL book");
+		System.out.println(location+" book");
 		return false;
 	}
 
