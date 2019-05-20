@@ -28,7 +28,7 @@
     }
 
     public ServerTemplate(String location,int port) {
-    	//recordSetup(localRecord);
+    	recordSetup(localRecord);
     	//Location="MTL";
     	this.location=location;
     	this.port=port;
@@ -88,7 +88,7 @@
 		
 		localRecord.get(eventType).put(eventID, bookingCapacity);
 		
-		System.out.println(localRecord.get(eventType).get(eventID));
+		System.out.println("The added capacity is"+localRecord.get(eventType).get(eventID));
 		
 		return false;
 	}
@@ -96,6 +96,7 @@
 	@Override
 	public LinkedList<String> listEventAvailability(String eventType) {
 		
+		//TODO require other data
 				
 		LinkedList<String> res= new LinkedList<String>();
 		

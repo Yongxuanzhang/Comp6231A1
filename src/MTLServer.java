@@ -1,3 +1,4 @@
+import java.rmi.RemoteException;
 
 public class MTLServer  {
 
@@ -8,6 +9,13 @@ public static void main(String args[]) {
 
 	ServerTemplate server = new ServerTemplate("MTL",2002);
 	server.start();
+	
+	try {
+		server.addEvent("12121", "Conference", 50);
+	} catch (RemoteException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
 
 
 }

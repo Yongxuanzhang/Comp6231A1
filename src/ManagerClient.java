@@ -36,7 +36,7 @@ public class ManagerClient {
               System.out.println(stub.addEvent("21322","Conference",413));
               
               
-              System.out.println(stub.removeEvent("21312","Conference"));
+              //System.out.println(stub.removeEvent("21312","Conference"));
               
               System.out.println(stub.listEventAvailability("Conference"));
               
@@ -61,7 +61,7 @@ public class ManagerClient {
         String host = (args.length < 1) ? null : args[0];
         
  
-        ManagerClient client2 = new ManagerClient(2002,"TORManagerOperation");
+        ManagerClient client2 = new ManagerClient(2002,"MTLManagerOperation");
         client2.start();
         
 
