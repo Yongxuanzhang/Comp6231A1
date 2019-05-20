@@ -8,6 +8,7 @@
 	import java.rmi.RemoteException;
 	import java.rmi.server.UnicastRemoteObject;
 	import java.util.HashMap;
+import java.util.LinkedList;
 	
 	public class Server implements ServerOperation {
 
@@ -94,6 +95,12 @@
 			//System.out.println(record.containsKey(eventType));
 			
 			return false;
+		}
+
+		@Override
+		public LinkedList<String> listEventAvailability(String eventType) {
+			// TODO Auto-generated method stub
+			return null;
 		}
 	}
 

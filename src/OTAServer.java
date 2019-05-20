@@ -35,18 +35,18 @@
 	        	OTAServer obj_customer = new OTAServer();
 	         
 	        	ServerOperation stub_Manager = (ServerOperation) UnicastRemoteObject.exportObject(obj, 0);
-	            CustomerOperation stub_customer = (CustomerOperation) UnicastRemoteObject.exportObject(obj_customer, 2);
+	            CustomerOperation stub_customer = (CustomerOperation) UnicastRemoteObject.exportObject(obj_customer, 3);
 
 	            // Bind the remote object's stub in the registry
 	          
-	            registry = LocateRegistry.getRegistry(1099);
+	            registry = LocateRegistry.getRegistry(2003);
 	            //System.setProperty("java.rmi.server.hostname","192.168.1.2");
 	            //registry.bind("rmi://localhost:1099/Hello", stub);
 	           // registry.bind("Hello", stub);
 	           
 	          
-	            registry.rebind("ManagerOperation", stub_Manager);
-	            registry.rebind("CustomerOperation", stub_customer);
+	            registry.rebind("OTAManagerOperation", stub_Manager);
+	            registry.rebind("OTACustomerOperation", stub_customer);
 	            
 	            
 	            System.err.println("OTAServer ready");
@@ -87,7 +87,7 @@
 		}
 		
 	    public String sayHello2() {
-	        return "Hello, MTL!";
+	        return "Hello, OTA!";
 	    }
 	    public String sayHello() {
 	        return "Hello, world!";
@@ -96,7 +96,7 @@
 
 		@Override
 		public boolean bookEvent(String customerID, String eventID, String eventType) throws RemoteException {
-			// TODO Auto-generated method stub
+			System.out.println("OTA book");
 			return false;
 		}
 
