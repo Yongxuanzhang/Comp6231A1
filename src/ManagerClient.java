@@ -30,10 +30,10 @@ public class ManagerClient {
    
               String response2 = stub.sayHello2();
               System.out.println("response: " + response2);
-              System.out.println(stub.addEvent("21312","Conference","33"));
-              System.out.println(stub.addEvent("2122","Conference","323"));
-              System.out.println(stub.addEvent("222","Conference","43"));
-              System.out.println(stub.addEvent("21322","Conference","413"));
+              System.out.println(stub.addEvent("21312","Conference",33));
+              System.out.println(stub.addEvent("2122","Conference",323));
+              System.out.println(stub.addEvent("222","Conference",43));
+              System.out.println(stub.addEvent("21322","Conference",413));
               
               
               System.out.println(stub.removeEvent("21312","Conference"));

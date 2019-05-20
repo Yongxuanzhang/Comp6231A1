@@ -30,7 +30,7 @@ public class Client{
    
               String response2 = stub.sayHello2();
               System.out.println("response: " + response2);
-              System.out.println(stub.addEvent("21312","Conference","33"));
+              System.out.println(stub.addEvent("21312","Conference",33));
               System.out.println(stub.removeEvent("21312","Conference"));
               
               

@@ -8,12 +8,13 @@
 	import java.rmi.RemoteException;
 	import java.rmi.server.UnicastRemoteObject;
 	import java.util.HashMap;
+import java.util.LinkedList;
 
-		public class OTAServer extends Server implements ServerOperation, CustomerOperation {
+		public class OTAServer implements ServerOperation, CustomerOperation {
 
 		
 		private Registry registry;
-		private HashMap<String,HashMap<String,String>> otarecord=new HashMap<String,HashMap<String,String>>();
+		private HashMap<String,HashMap<String,Integer>> otarecord=new HashMap<String,HashMap<String,Integer>>();
 		private String Location;
 		
 	    public static void main(String args[]) {
@@ -63,7 +64,7 @@
 		@Override
 		public boolean removeEvent(String eventID, String eventType) {
 			// TODO Auto-generated method stub
-			HashMap<String,String> temp=new HashMap<String,String>();
+			HashMap<String,Integer> temp=new HashMap<String,Integer>();
 			temp.put(eventID,otarecord.get(eventType).get(eventID));
 					
 			otarecord.remove(eventID, temp);
@@ -74,9 +75,9 @@
 
 
 		@Override
-		public boolean addEvent(String eventID,String eventType,String bookingCapacity) throws RemoteException {
+		public boolean addEvent(String eventID,String eventType,Integer bookingCapacity) throws RemoteException {
 			
-			HashMap<String,String> rec=new HashMap<String,String>();
+			HashMap<String,Integer> rec=new HashMap<String,Integer>();
 					rec.put(eventID, bookingCapacity);
 					
 			otarecord.put(eventType, rec);
@@ -112,13 +113,19 @@
 			return false;
 		}
 		
-		private void recordSetup(HashMap<String,HashMap<String,String>> mtlrecord){
+		private void recordSetup(HashMap<String,HashMap<String,Integer>> mtlrecord){
 			
 		
 		}
 		
-		public HashMap<String,HashMap<String,String>> getRecord(){
+		public HashMap<String,HashMap<String,Integer>> getRecord(){
 			return otarecord;
+		}
+
+		@Override
+		public LinkedList<String> listEventAvailability(String eventType) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
 		}
 		
 	}

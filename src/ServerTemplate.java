@@ -12,47 +12,49 @@
 	import java.util.List;
 	import java.util.Map;
 
-	public class Server  implements ServerOperation, CustomerOperation {
+	public class ServerTemplate implements ServerOperation, CustomerOperation {
 
 	
 	private Registry registry;
-	private HashMap<String,HashMap<String,Integer>> mtlrecord=new HashMap<String,HashMap<String,Integer>>();
-	private String Location;
+	private HashMap<String,HashMap<String,Integer>> localRecord=new HashMap<String,HashMap<String,Integer>>();
+	private String location;
+	private int port;
 	
     public static void main(String args[]) {
 
-    	Server server = new Server();
+    	ServerTemplate server = new ServerTemplate("MTL",2005);
 		server.start();
 
     }
 
-    private Server() {
-    	recordSetup(mtlrecord);
-    	Location="MTL";
+    public ServerTemplate(String location,int port) {
+    	//recordSetup(localRecord);
+    	//Location="MTL";
+    	this.location=location;
+    	this.port=port;
+    	
     }
 
     public void start() {
 	
         try {
-        	Server obj = new Server();
-        	Server obj_customer = new Server();
+        	ServerTemplate obj = new ServerTemplate(location,port);
+        	ServerTemplate obj_customer = new ServerTemplate(location,port);
          
         	ServerOperation stub_Manager = (ServerOperation) UnicastRemoteObject.exportObject(obj, 0);
-            CustomerOperation stub_customer = (CustomerOperation) UnicastRemoteObject.exportObject(obj_customer, 2);
-
+            CustomerOperation stub_customer = (CustomerOperation) UnicastRemoteObject.exportObject(obj_customer, 0);
+            
             // Bind the remote object's stub in the registry
           
-            registry = LocateRegistry.getRegistry(2002);
-            //System.setProperty("java.rmi.server.hostname","192.168.1.2");
-            //registry.bind("rmi://localhost:1099/Hello", stub);
-           // registry.bind("Hello", stub);
-           
-          
-            registry.rebind("ManagerOperation", stub_Manager);
-            registry.rebind("CustomerOperation", stub_customer);
+            registry = LocateRegistry.getRegistry(port);
+
+            registry.rebind(location+"ManagerOperation", stub_Manager);
+            registry.rebind(location+"CustomerOperation", stub_customer);
+            
+            System.err.println(location+"ManagerOperation"+" has blinded");
             
             
-            System.err.println("Server ready");
+            System.err.println("Server "+location+" ready");
             
             
         } catch (Exception e) {
@@ -67,11 +69,11 @@
 	public boolean removeEvent(String eventID, String eventType) {
 		// TODO Auto-generated method stub
 		HashMap<String,Integer> temp=new HashMap<String,Integer>();
-		temp.put(eventID,mtlrecord.get(eventType).get(eventID));
+		temp.put(eventID,localRecord.get(eventType).get(eventID));
 				
-		mtlrecord.remove(eventID, temp);
+		localRecord.remove(eventID, temp);
 		
-		System.out.println(mtlrecord.get(eventType).get(eventID));
+		System.out.println(localRecord.get(eventType).get(eventID));
 		return false;
 	}
 
@@ -82,11 +84,11 @@
 		HashMap<String,Integer> rec=new HashMap<String,Integer>();
 		rec.put(eventID, bookingCapacity);
 				
-		//mtlrecord.put(eventType, rec);
+		//localRecord.put(eventType, rec);
 		
-		mtlrecord.get(eventType).put(eventID, bookingCapacity);
+		localRecord.get(eventType).put(eventID, bookingCapacity);
 		
-		System.out.println(mtlrecord.get(eventType).get(eventID));
+		System.out.println(localRecord.get(eventType).get(eventID));
 		
 		return false;
 	}
@@ -97,7 +99,7 @@
 				
 		LinkedList<String> res= new LinkedList<String>();
 		
-		Map<String,Integer> temp=mtlrecord.get(eventType);
+		Map<String,Integer> temp=localRecord.get(eventType);
 		
 		for (Map.Entry<String,Integer> entry : temp.entrySet()) {
 			 
@@ -140,21 +142,21 @@
 		return false;
 	}
 	
-	private void recordSetup(HashMap<String,HashMap<String,Integer>> mtlrecord){
+	private void recordSetup(HashMap<String,HashMap<String,Integer>> localRecord){
 		 
 		
 			HashMap<String,Integer>value=new HashMap<String,Integer>();
 			
 			value.put("111", 222);
 		
-		    mtlrecord.put("Conference", value);
+		    localRecord.put("Conference", value);
 		
 		
 	
 	}
 	
 	public HashMap<String,HashMap<String,Integer>> getRecord(){
-		return mtlrecord;
+		return localRecord;
 	}
 	
 }

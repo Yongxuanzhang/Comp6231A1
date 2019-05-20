@@ -55,15 +55,17 @@ public class CustomerClient {
     public static void main(String[] args) {
 
         //String host = (args.length < 1) ? null : args[0];
-        
+        /*
         CustomerClient  client = new CustomerClient ("TORM2345",2003,"OTACustomerOperation");
         client.start();
         CustomerClient  client2 = new CustomerClient ("TORM2345",2002,"CustomerOperation");
         client2.start();
         CustomerClient  client3 = new CustomerClient ("TORM2345",2004,"TORCustomerOperation");
         client3.start();
+        */
+        CustomerClient  client4 = new CustomerClient ("TORM2345",2005,"MTLCustomerOperation");
+        client4.start();
         
-
     }
 
 }

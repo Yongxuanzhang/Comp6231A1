@@ -8,15 +8,15 @@
 	import java.rmi.RemoteException;
 	import java.rmi.server.UnicastRemoteObject;
 	import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+	import java.util.LinkedList;
+	import java.util.List;
+	import java.util.Map;
 
-	public class MTLServer extends Server implements ServerOperation, CustomerOperation {
+	public class MTLServer implements ServerOperation, CustomerOperation {
 
 	
 	private Registry registry;
-	private HashMap<String,HashMap<String,String>> mtlrecord=new HashMap<String,HashMap<String,String>>();
+	private HashMap<String,HashMap<String,Integer>> mtlrecord=new HashMap<String,HashMap<String,Integer>>();
 	private String Location;
 	
     public static void main(String args[]) {
@@ -66,7 +66,7 @@ import java.util.Map;
 	@Override
 	public boolean removeEvent(String eventID, String eventType) {
 		// TODO Auto-generated method stub
-		HashMap<String,String> temp=new HashMap<String,String>();
+		HashMap<String,Integer> temp=new HashMap<String,Integer>();
 		temp.put(eventID,mtlrecord.get(eventType).get(eventID));
 				
 		mtlrecord.remove(eventID, temp);
@@ -77,9 +77,9 @@ import java.util.Map;
 
 
 	@Override
-	public boolean addEvent(String eventID,String eventType,String bookingCapacity) throws RemoteException {
+	public boolean addEvent(String eventID,String eventType,Integer bookingCapacity) throws RemoteException {
 		
-		HashMap<String,String> rec=new HashMap<String,String>();
+		HashMap<String,Integer> rec=new HashMap<String,Integer>();
 		rec.put(eventID, bookingCapacity);
 				
 		//mtlrecord.put(eventType, rec);
@@ -97,9 +97,9 @@ import java.util.Map;
 				
 		LinkedList<String> res= new LinkedList<String>();
 		
-		Map<String,String> temp=mtlrecord.get(eventType);
+		Map<String,Integer> temp=mtlrecord.get(eventType);
 		
-		for (Map.Entry<String,String> entry : temp.entrySet()) {
+		for (Map.Entry<String,Integer> entry : temp.entrySet()) {
 			 
 		    System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
 		    res.add(entry.getKey()+" "+entry.getValue());
@@ -140,12 +140,12 @@ import java.util.Map;
 		return false;
 	}
 	
-	private void recordSetup(HashMap<String,HashMap<String,String>> mtlrecord){
+	private void recordSetup(HashMap<String,HashMap<String,Integer>> mtlrecord){
 		 
 		
-			HashMap<String,String>value=new HashMap<String,String>();
+			HashMap<String,Integer>value=new HashMap<String,Integer>();
 			
-			value.put("111", "222");
+			value.put("111", 222);
 		
 		    mtlrecord.put("Conference", value);
 		
@@ -153,7 +153,7 @@ import java.util.Map;
 	
 	}
 	
-	public HashMap<String,HashMap<String,String>> getRecord(){
+	public HashMap<String,HashMap<String,Integer>> getRecord(){
 		return mtlrecord;
 	}
 	
