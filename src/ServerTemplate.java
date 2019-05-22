@@ -12,7 +12,7 @@
 	import java.util.List;
 	import java.util.Map;
 
-	public class ServerTemplate implements ServerOperation, CustomerOperation {
+	public class ServerTemplate implements ServerOperation{
 
 	//MTL2002;OTA2003;TOR2004
 	private Registry registry;
@@ -137,11 +137,8 @@
 		return false;
 	}
 
-	@Override
-	public boolean getBookingSchedule(String customerID, String eventID) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	
+
 	
 	private void recordSetup(HashMap<String,HashMap<String,Integer>> localRecord){
 		 
@@ -158,6 +155,12 @@
 	
 	public HashMap<String,HashMap<String,Integer>> getRecord(){
 		return localRecord;
+	}
+
+	@Override
+	public LinkedList<String[]> getBookingSchedule(String customerID, String eventID) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

@@ -12,22 +12,26 @@
 	import java.util.List;
 	import java.util.Map;
 
-	public class Server  implements ServerOperation, CustomerOperation {
+	public class Server implements ServerOperation {
 
 	
 	private Registry registry;
-	private HashMap<String,HashMap<String,Integer>> mtlrecord=new HashMap<String,HashMap<String,Integer>>();
+	private HashMap<String,HashMap<String,Integer>> record=new HashMap<String,HashMap<String,Integer>>();
 	private String Location;
+	private LinkedList<String[]> userSchedule;
 	
     public static void main(String args[]) {
 
     	Server server = new Server();
 		server.start();
-
+		ServerTemplate serverOTA = new ServerTemplate("OTA",2003);
+		server.start();
+		ServerTemplate serverMTA = new ServerTemplate("MTL",2002);
+		server.start();
     }
 
     private Server() {
-    	recordSetup(mtlrecord);
+    	recordSetup(record);
     	Location="MTL";
     }
 
@@ -38,18 +42,18 @@
         	Server obj_customer = new Server();
          
         	ServerOperation stub_Manager = (ServerOperation) UnicastRemoteObject.exportObject(obj, 0);
-            CustomerOperation stub_customer = (CustomerOperation) UnicastRemoteObject.exportObject(obj_customer, 2);
+           // CustomerOperation stub_customer = (CustomerOperation) UnicastRemoteObject.exportObject(obj_customer, 2);
 
             // Bind the remote object's stub in the registry
           
-            registry = LocateRegistry.getRegistry(2002);
+            registry = LocateRegistry.getRegistry(1099);
             //System.setProperty("java.rmi.server.hostname","192.168.1.2");
             //registry.bind("rmi://localhost:1099/Hello", stub);
            // registry.bind("Hello", stub);
            
           
             registry.rebind("ManagerOperation", stub_Manager);
-            registry.rebind("CustomerOperation", stub_customer);
+            //registry.rebind("CustomerOperation", stub_customer);
             
             
             System.err.println("Server ready");
@@ -64,14 +68,14 @@
     	
     
 	@Override
-	public boolean removeEvent(String eventID, String eventType) {
+	public boolean removeEvent(String eventID, String eventType)  throws RemoteException{
 		// TODO Auto-generated method stub
 		HashMap<String,Integer> temp=new HashMap<String,Integer>();
-		temp.put(eventID,mtlrecord.get(eventType).get(eventID));
+		temp.put(eventID,record.get(eventType).get(eventID));
 				
-		mtlrecord.remove(eventID, temp);
+		record.remove(eventID, temp);
 		
-		System.out.println(mtlrecord.get(eventType).get(eventID));
+		System.out.println(record.get(eventType).get(eventID));
 		return false;
 	}
 
@@ -82,22 +86,22 @@
 		HashMap<String,Integer> rec=new HashMap<String,Integer>();
 		rec.put(eventID, bookingCapacity);
 				
-		//mtlrecord.put(eventType, rec);
+		//record.put(eventType, rec);
 		
-		mtlrecord.get(eventType).put(eventID, bookingCapacity);
+		record.get(eventType).put(eventID, bookingCapacity);
 		
-		System.out.println(mtlrecord.get(eventType).get(eventID));
+		System.out.println(record.get(eventType).get(eventID));
 		
 		return false;
 	}
 	
 	@Override
-	public LinkedList<String> listEventAvailability(String eventType) {
+	public LinkedList<String> listEventAvailability(String eventType) throws RemoteException {
 		
 				
 		LinkedList<String> res= new LinkedList<String>();
 		
-		Map<String,Integer> temp=mtlrecord.get(eventType);
+		Map<String,Integer> temp=record.get(eventType);
 		
 		for (Map.Entry<String,Integer> entry : temp.entrySet()) {
 			 
@@ -108,7 +112,43 @@
 		
 		return res;
 	}
-	
+
+	public boolean bookEvent(String customerID, String eventID, String eventType) throws RemoteException {
+		
+		
+		int newCapacity=record.get(eventType).get(eventID)+1;
+		record.get(eventType).put(eventID, newCapacity);
+		
+		//userSchedule.addAll(customerID, eventID);
+		String[] userTemp= {customerID, eventID};
+		userSchedule.add(userTemp);
+		
+		return true;
+	}
+
+
+	public boolean cancelEvent(String eventID, String customerID) throws RemoteException {
+		
+		for(String[] o: userSchedule) {
+			
+			if(o[0].equalsIgnoreCase(eventID)&o[1].equalsIgnoreCase(customerID)) {
+				userSchedule.remove(o);
+				return true;
+			}
+		
+		}
+		
+		
+		
+		return false;
+	}
+
+
+	public LinkedList<String[]> getBookingSchedule(String customerID, String eventID) throws RemoteException {
+		
+		
+		return userSchedule;
+	}
 	
     public String sayHello2() {
         return "Welcome to MTL Server!";
@@ -118,44 +158,26 @@
     }
     
 
-	@Override
-	public boolean bookEvent(String customerID, String eventID, String eventType) throws RemoteException {
-		// TODO Auto-generated method stub
-		
-		
-		
-		System.out.println("MTL book");
-		return false;
-	}
 
-	@Override
-	public boolean cancelEvent(String eventID, String eventType) throws RemoteException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean getBookingSchedule(String customerID, String eventID) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 	
-	private void recordSetup(HashMap<String,HashMap<String,Integer>> mtlrecord){
+	private void recordSetup(HashMap<String,HashMap<String,Integer>> record){
 		 
 		
 			HashMap<String,Integer>value=new HashMap<String,Integer>();
 			
 			value.put("111", 222);
 		
-		    mtlrecord.put("Conference", value);
+		    record.put("Conference", value);
 		
 		
 	
 	}
 	
 	public HashMap<String,HashMap<String,Integer>> getRecord(){
-		return mtlrecord;
+		return record;
 	}
+
+
 	
 }
 
