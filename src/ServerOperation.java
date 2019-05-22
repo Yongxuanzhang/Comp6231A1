@@ -1,6 +1,7 @@
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 public interface ServerOperation extends Remote {
@@ -13,6 +14,6 @@ public interface ServerOperation extends Remote {
     
     boolean bookEvent(String customerID,String eventID,String eventType) throws RemoteException;
     boolean cancelEvent (String eventID, String customerID)throws RemoteException;
-    LinkedList<String[]> getBookingSchedule (String customerID,String eventID)throws RemoteException;
+    LinkedList<String>  getBookingSchedule (String customerID)throws RemoteException;
     
 }

@@ -17,46 +17,36 @@
 	
 	private Registry registry;
 	private HashMap<String,HashMap<String,Integer>> record=new HashMap<String,HashMap<String,Integer>>();
-	private String Location;
-	private LinkedList<String[]> userSchedule;
+	private int port;
+	private String location;
+	//private LinkedList<String[]> userSchedule;
+	private HashMap<String,LinkedList<String>> userSchedule=new HashMap<String,LinkedList<String>>();
 	
     public static void main(String args[]) {
 
-    	Server server = new Server();
-		server.start();
-		ServerTemplate serverOTA = new ServerTemplate("OTA",2003);
-		server.start();
-		ServerTemplate serverMTA = new ServerTemplate("MTL",2002);
-		server.start();
+  
     }
 
-    private Server() {
-    	recordSetup(record);
-    	Location="MTL";
+
+    
+    public Server(String location,int port,HashMap<String,HashMap<String,Integer>> newRecord) {
+    	//recordSetup(record);
+    	//Location="MTL";
+    	this.location=location;
+    	this.port=port;
+    	this.record=newRecord;
     }
 
     public void start() {
 	
         try {
-        	Server obj = new Server();
-        	Server obj_customer = new Server();
-         
-        	ServerOperation stub_Manager = (ServerOperation) UnicastRemoteObject.exportObject(obj, 0);
-           // CustomerOperation stub_customer = (CustomerOperation) UnicastRemoteObject.exportObject(obj_customer, 2);
-
-            // Bind the remote object's stub in the registry
-          
-            registry = LocateRegistry.getRegistry(1099);
-            //System.setProperty("java.rmi.server.hostname","192.168.1.2");
-            //registry.bind("rmi://localhost:1099/Hello", stub);
-           // registry.bind("Hello", stub);
-           
-          
-            registry.rebind("ManagerOperation", stub_Manager);
-            //registry.rebind("CustomerOperation", stub_customer);
-            
-            
-            System.err.println("Server ready");
+           	Server obj = new Server(location,port,record);     
+        	ServerOperation stub = (ServerOperation) UnicastRemoteObject.exportObject(obj, 0);
+            registry = LocateRegistry.getRegistry(port);                     
+            registry.rebind(location+"ManagerOperation", stub);
+                       
+            System.err.println(location+"ManagerOperation"+" has blinded");                       
+            System.err.println("Server "+location+" ready");
             
             
         } catch (Exception e) {
@@ -92,7 +82,7 @@
 		
 		System.out.println(record.get(eventType).get(eventID));
 		
-		return false;
+		return true;
 	}
 	
 	@Override
@@ -116,19 +106,33 @@
 	public boolean bookEvent(String customerID, String eventID, String eventType) throws RemoteException {
 		
 		
+		
+		//userSchedule.addAll(customerID, eventID);
+		//String[] userTemp= {customerID, eventID};
+		//userSchedule.add(userTemp);
+		System.out.println(customerID);
+		System.out.println(userSchedule.containsKey(customerID)+" -- ");
+		if(userSchedule.containsKey(customerID)&&userSchedule.get(customerID).contains(eventID)) return false;
+		
 		int newCapacity=record.get(eventType).get(eventID)+1;
 		record.get(eventType).put(eventID, newCapacity);
 		
-		//userSchedule.addAll(customerID, eventID);
-		String[] userTemp= {customerID, eventID};
-		userSchedule.add(userTemp);
+		if(userSchedule.containsKey(customerID)) {
+			userSchedule.get(customerID).add(eventID);
+			
+		}else {
+			LinkedList<String> usTemp= new LinkedList<String>();
+			usTemp.add(eventID);		
+			userSchedule.put(customerID, usTemp);
+		}
+		
 		
 		return true;
 	}
 
 
 	public boolean cancelEvent(String eventID, String customerID) throws RemoteException {
-		
+		/*
 		for(String[] o: userSchedule) {
 			
 			if(o[0].equalsIgnoreCase(eventID)&o[1].equalsIgnoreCase(customerID)) {
@@ -137,21 +141,29 @@
 			}
 		
 		}
+		*/
+		
+		if(userSchedule.containsKey(customerID)) {
+			userSchedule.get(customerID).remove(eventID);
+			
+			
+			return true;
+		}else {
+			return false;
+		}
 		
 		
-		
-		return false;
+	}
+
+	@Override
+	public LinkedList<String> getBookingSchedule(String customerID) throws RemoteException {
+		// TODO Auto-generated method stub
+		return userSchedule.get(customerID);
 	}
 
 
-	public LinkedList<String[]> getBookingSchedule(String customerID, String eventID) throws RemoteException {
-		
-		
-		return userSchedule;
-	}
-	
     public String sayHello2() {
-        return "Welcome to MTL Server!";
+        return "Welcome to "+location+" Server!";
     }
     public String sayHello() {
         return "Hello, world!";
@@ -160,7 +172,7 @@
 
 
 	
-	private void recordSetup(HashMap<String,HashMap<String,Integer>> record){
+	public void recordSetup(HashMap<String,HashMap<String,Integer>> record){
 		 
 		
 			HashMap<String,Integer>value=new HashMap<String,Integer>();
@@ -169,13 +181,16 @@
 		
 		    record.put("Conference", value);
 		
-		
+			this.record=record;
 	
 	}
 	
 	public HashMap<String,HashMap<String,Integer>> getRecord(){
 		return record;
 	}
+
+
+
 
 
 	
