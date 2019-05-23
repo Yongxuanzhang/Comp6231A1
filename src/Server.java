@@ -37,6 +37,13 @@ public class Server implements ServerOperation {
 	private DatagramSocket aSocket1;
 	private DatagramSocket aSocket2;
 	private String location;
+	
+	private Registry registry1;    
+	private Registry registry2;
+
+	private ServerOperation stub1;
+	private ServerOperation stub2;
+	
 	//private LinkedList<String[]> userSchedule;
 	private HashMap<String,LinkedList<String>> userSchedule=new HashMap<String,LinkedList<String>>();
 	private DatagramSocket aSocket = null;
@@ -83,8 +90,19 @@ public class Server implements ServerOperation {
     	
     		
     	}
-    	
-    	//System.out.println(targetPort1+"--"+targetPort2);
+
+		try {
+			registry1 = LocateRegistry.getRegistry(targetPort1);    
+			registry2 = LocateRegistry.getRegistry(targetPort2);
+
+			stub1 = (ServerOperation) registry1.lookup(targetStub1);
+			stub2 = (ServerOperation) registry2.lookup(targetStub2);
+			
+		} catch (Exception e) {
+
+			e.printStackTrace();
+		}    
+
     }
 
     public void start() {
@@ -108,7 +126,7 @@ public class Server implements ServerOperation {
     	
     
 	@Override
-	public boolean removeEvent(String eventID, String eventType)  throws RemoteException{
+	public synchronized boolean  removeEvent(String eventID, String eventType)  throws RemoteException{
 		// TODO Auto-generated method stub
 		HashMap<String,Integer> temp=new HashMap<String,Integer>();
 		temp.put(eventID,record.get(eventType).get(eventID));
@@ -121,7 +139,7 @@ public class Server implements ServerOperation {
 
 
 	@Override
-	public boolean addEvent(String eventID,String eventType,Integer bookingCapacity) throws RemoteException {
+	public synchronized boolean addEvent(String eventID,String eventType,Integer bookingCapacity) throws RemoteException {
 		
 		HashMap<String,Integer> rec=new HashMap<String,Integer>();
 		rec.put(eventID, bookingCapacity);
@@ -192,12 +210,12 @@ public class Server implements ServerOperation {
 	
 	public void requestData(String eventType) throws AccessException, RemoteException, NotBoundException {
 		
-		System.out.println("targetStub1 "+targetStub1);
-		Registry registry1 = LocateRegistry.getRegistry(targetPort1);    
-		Registry registry2 = LocateRegistry.getRegistry(targetPort2);
+		//System.out.println("targetStub1 "+targetStub1);
+		//Registry registry1 = LocateRegistry.getRegistry(targetPort1);    
+		//Registry registry2 = LocateRegistry.getRegistry(targetPort2);
 
-		ServerOperation stub1 = (ServerOperation) registry1.lookup(targetStub1);
-		ServerOperation stub2 = (ServerOperation) registry2.lookup(targetStub2);
+		//ServerOperation stub1 = (ServerOperation) registry1.lookup(targetStub1);
+		//ServerOperation stub2 = (ServerOperation) registry2.lookup(targetStub2);
 		stub1.sendData(eventType, receivePort1);
 		stub2.sendData(eventType, receivePort2);
 		
@@ -265,13 +283,15 @@ public class Server implements ServerOperation {
     	
     }
 	
-	public boolean bookEvent(String customerID, String eventID, String eventType) throws RemoteException {
+	public synchronized boolean bookEvent(String customerID, String eventID, String eventType) throws RemoteException {
 		
 		
 		
 		//userSchedule.addAll(customerID, eventID);
 		//String[] userTemp= {customerID, eventID};
 		//userSchedule.add(userTemp);
+		
+		
 		System.out.println(customerID);
 		System.out.println(userSchedule.containsKey(customerID)+" -- ");
 		if(userSchedule.containsKey(customerID)&&userSchedule.get(customerID).contains(eventID)) return false;
@@ -293,7 +313,7 @@ public class Server implements ServerOperation {
 	}
 
 
-	public boolean cancelEvent(String eventID, String customerID) throws RemoteException {
+	public synchronized boolean cancelEvent(String eventID, String customerID) throws RemoteException {
 		/*
 		for(String[] o: userSchedule) {
 			

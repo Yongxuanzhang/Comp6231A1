@@ -17,7 +17,7 @@ public static void main(String args[]) {
 	TORrecord.put("Seminars", value);
 	
 	Server server = new Server("TOR",2004,TORrecord);
-	server.start();
+	//server.start();
 
 	}
 
