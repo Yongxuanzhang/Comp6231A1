@@ -13,7 +13,7 @@ public interface ServerOperation extends Remote {
     boolean removeEvent (String eventID, String eventType)throws RemoteException;
     LinkedList<String> listEventAvailability(String eventType)throws RemoteException ;
     
-    boolean bookEvent(String customerID,String eventID,String eventType) throws RemoteException;
+    int bookEvent(String customerID,String eventID,String eventType) throws RemoteException;
     boolean cancelEvent (String eventID, String customerID)throws RemoteException;
     LinkedList<String>  getBookingSchedule (String customerID)throws RemoteException;
     

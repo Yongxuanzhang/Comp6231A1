@@ -1,9 +1,10 @@
+import java.io.IOException;
 import java.util.HashMap;
 
 public class TORServer{
 
 
-public static void main(String args[]) {
+public static void main(String args[]) throws SecurityException, IOException {
 
 	
 	HashMap<String,HashMap<String,Integer>> TORrecord=new HashMap<String,HashMap<String,Integer>>();

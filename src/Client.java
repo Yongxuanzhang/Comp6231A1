@@ -104,7 +104,7 @@ public class Client extends Thread {
         //System.out.println(stub.listEventAvailability("Seminars"));
         
       
-        if(stub.bookEvent("TORM2345", "21312", "Conference")) {
+        if(stub.bookEvent("TORM2345", "21312", "Conference")==1) {
       	  System.out.println("booked successfully!");
       	  
         }

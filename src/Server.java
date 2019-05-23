@@ -10,7 +10,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -25,7 +25,7 @@ import java.net.InetAddress;
 public class Server implements ServerOperation {
 
 	
-	private Registry registry;
+	
 	private HashMap<String,HashMap<String,Integer>> record=new HashMap<String,HashMap<String,Integer>>();
 	private int port;
 	private int receivePort1;
@@ -37,10 +37,10 @@ public class Server implements ServerOperation {
 	private DatagramSocket aSocket1;
 	private DatagramSocket aSocket2;
 	private String location;
-	
+	private Registry registry;
 	private Registry registry1;    
 	private Registry registry2;
-
+	private Log serverLog;
 	private ServerOperation stub1;
 	private ServerOperation stub2;
 	
@@ -55,12 +55,12 @@ public class Server implements ServerOperation {
 
 
     
-    public Server(String location,int port,HashMap<String,HashMap<String,Integer>> newRecord) {
+    public Server(String location,int port,HashMap<String,HashMap<String,Integer>> newRecord) throws SecurityException, IOException {
     	//recordSetup(record);
     	//Location="MTL";
     	this.location=location;
     	this.port=port;
-    	
+    	this.serverLog= new Log(location+"serverOperation.txt");
     	this.record=newRecord;
     	receivePort1=port+3000;
     	receivePort2=port+3005;
@@ -283,10 +283,16 @@ public class Server implements ServerOperation {
     	
     }
 	
-	public synchronized boolean bookEvent(String customerID, String eventID, String eventType) throws RemoteException {
+	public synchronized int bookEvent(String customerID, String eventID, String eventType) throws RemoteException {
 		
 		
-		
+		/**
+		 * use error code for return:
+		 * -1:Book more than 3 events in 1 month from other servers;
+		 * -2:Same eventID and eventType;
+		 * -3:The capacity is full;
+		 * 
+		 */
 		//userSchedule.addAll(customerID, eventID);
 		//String[] userTemp= {customerID, eventID};
 		//userSchedule.add(userTemp);
@@ -294,10 +300,37 @@ public class Server implements ServerOperation {
 		
 		System.out.println(customerID);
 		System.out.println(userSchedule.containsKey(customerID)+" -- ");
-		if(userSchedule.containsKey(customerID)&&userSchedule.get(customerID).contains(eventID)) return false;
 		
-		int newCapacity=record.get(eventType).get(eventID)+1;
-		record.get(eventType).put(eventID, newCapacity);
+		
+	
+		String eventLoc= eventID.substring(0, 3);
+		
+		if(eventLoc.equals(location)!=true) {
+			if(eventLoc.equals(targetStub1.substring(0, 3))) {
+				stub1.bookEvent(customerID, eventID, eventType);
+			}else if(eventLoc.equals(targetStub2.substring(0, 3))) {
+				stub2.bookEvent(customerID, eventID, eventType);
+			}
+			else return -4;
+		}
+		
+		int checkTimes=0;
+		
+		for(String o:userSchedule.get(customerID)) {
+			checkTimes++;
+		}
+		if(checkTimes>=3)return -1;
+	
+		//if(userSchedule.containsKey(customerID)&&userSchedule.get(customerID).contains(eventID)) return -1;
+		if(record.get(eventType).containsKey(eventID))return -2;
+			
+			
+		int newCapacity=record.get(eventType).get(eventID);
+		if(newCapacity==0)return -3;
+		else {
+			newCapacity--;
+			record.get(eventType).put(eventID, newCapacity);
+		}
 		
 		if(userSchedule.containsKey(customerID)) {
 			userSchedule.get(customerID).add(eventID);
@@ -309,7 +342,7 @@ public class Server implements ServerOperation {
 		}
 		
 		
-		return true;
+		return 1;
 	}
 
 

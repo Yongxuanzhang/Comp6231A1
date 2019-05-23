@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 
@@ -6,7 +7,7 @@ public class MTLServer  {
 
 //MTL2002;OTA2003;TOR2004
 
-public static void main(String args[]) {
+public static void main(String args[]) throws SecurityException, IOException {
 
 
 	
