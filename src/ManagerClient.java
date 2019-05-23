@@ -1,3 +1,4 @@
+import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.LinkedList;
@@ -44,12 +45,12 @@ public class ManagerClient {
         System.out.println(stub.addEvent("222","Conference",43));
         System.out.println(stub.addEvent("21312","Conference",413));
      
-        System.out.println(stub.listEventAvailability("Conference"));
-        System.out.println(stub.listEventAvailability("Seminars"));
+        //System.out.println(stub.listEventAvailability("Conference"));
+        //System.out.println(stub.listEventAvailability("Seminars"));
         System.out.println(stub.bookEvent("TORM2345", "21312", "Conference"));
         System.out.println(stub.bookEvent("TORM2545", "111", "Seminars"));
         System.out.println(stub.listEventAvailability("Conference"));
-        System.out.println(stub.listEventAvailability("Seminars"));
+        //System.out.println(stub.listEventAvailability("Seminars"));
         
       
         if(stub.bookEvent("TORM2345", "21312", "Conference")) {
@@ -66,7 +67,7 @@ public class ManagerClient {
         
         //System.out.println(stub.removeEvent("21312","Conference"));
         
-        System.out.println(stub.listEventAvailability("Conference"));
+       // System.out.println(stub.listEventAvailability("Conference"));
         
         /*
         LinkedList<String> res= new LinkedList<String>();
@@ -88,14 +89,14 @@ public class ManagerClient {
         String host = (args.length < 1) ? null : args[0];
         
  
-        ManagerClient client2 = new ManagerClient(2002,"MTLManagerOperation");
-        client2.start();
-        client2.demo();
+
         
         ManagerClient client1 = new ManagerClient(2003,"OTAManagerOperation");
         client1.start();
         client1.demo();
-
+        ManagerClient client2 = new ManagerClient(2002,"MTLManagerOperation");
+        client2.start();
+        client2.demo();
 
     }
 }

@@ -25,22 +25,8 @@ public static void main(String args[]) {
 	server.start();
 	server.recordSetup(MTLrecord);
 	
-	try {
-		server.listEventAvailability("Conference");
-	} catch (RemoteException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-	}
-	try {
-		
-		//server.addEvent("12121", "Seminars", 50);
-		//server.addEvent("11", "Trade shows", 500);
-		
-		server.listEventAvailability("Conference");
-	} catch (RemoteException e) {
-	
-		e.printStackTrace();
-	}
+
+
 
 
 }
