@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.rmi.Naming;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.LinkedList;
@@ -78,6 +79,16 @@ public class Client extends Thread {
    // }
     
     
+    public void callServerBookEvent(String customerID,String eventID,String eventType) throws RemoteException {
+    	
+    	int res=stub.bookEvent(customerID, eventID, eventType);
+    	System.out.println("booked "+res);
+    	 if(res==1){
+         	  System.out.println("booked successfully!");
+          	  
+         }
+    }
+    
     public void managerOperation() {
     	  //String response = stub.sayHello();
         //System.out.println("response: " + response);
@@ -95,24 +106,26 @@ public class Client extends Thread {
         System.out.println(stub.addEvent("OTWA100619", "Conference", 50));
         System.out.println(stub.addEvent("TORM100719","Conference",323));
         System.out.println(stub.addEvent("OTWA101519","Seminars",43));
-        System.out.println(stub.addEvent("OTWA110519","Conference",413));
+        System.out.println(stub.addEvent("MTLA110519","Conference",413));
      
  
-        System.out.println(stub.bookEvent("TORM2345", "OTWA110519", "Conference"));
-        System.out.println(stub.bookEvent("TORM2545", "OTWA101519", "Seminars"));
+        //System.out.println(stub.bookEvent("TORM2345", "OTWA110519", "Conference"));
+        //System.out.println(stub.bookEvent("TORM2545", "OTWA101519", "Seminars"));
         System.out.println(stub.listEventAvailability("Conference"));
         //System.out.println(stub.listEventAvailability("Seminars"));
         
-      
-        if(stub.bookEvent("TORM2345", "21312", "Conference")==1) {
+        
+        callServerBookEvent("MTLM2345", "MTLA110519", "Conference");
+        
+        if(stub.bookEvent("MTLM2345", "MTLA110519", "Conference")==1) {
       	  System.out.println("booked successfully!");
       	  
         }
         
-        stub.getBookingSchedule("TORM2345");
+        stub.getBookingSchedule("MTLM2345");
         
-        for(String o : stub.getBookingSchedule("TORM2345")) {
-      	  System.out.println("TORM2345--"+o);
+        for(String o : stub.getBookingSchedule("MTLM2345")) {
+      	  System.out.println("MTLM2345--"+o);
         }
 
         
@@ -148,17 +161,15 @@ public class Client extends Thread {
 		try {
 			client1 = new Client("OTAC2345");
 	        client1.start();
-	        // client1.demo();
-	         Client client2 = new Client("MTLM2345");
-	         client2.start();
-	         Client client3 = new Client("MTLM2345");
-	         client3.start();
-	        // client2.demo();
+	        Client client2 = new Client("MTLM2345");
+	        client2.start();
+	        Client client3 = new Client("MTLM2345");
+	        client3.start();
+
 			
 			
 			
 		} catch (SecurityException | IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

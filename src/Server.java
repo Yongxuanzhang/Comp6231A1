@@ -43,7 +43,7 @@ public class Server implements ServerOperation {
 	private Log serverLog;
 	private ServerOperation stub1;
 	private ServerOperation stub2;
-	
+	private boolean binded=false;
 	//private LinkedList<String[]> userSchedule;
 	private HashMap<String,LinkedList<String>> userSchedule=new HashMap<String,LinkedList<String>>();
 	private DatagramSocket aSocket = null;
@@ -90,7 +90,7 @@ public class Server implements ServerOperation {
     	
     		
     	}
-
+/*
 		try {
 			registry1 = LocateRegistry.getRegistry(targetPort1);    
 			registry2 = LocateRegistry.getRegistry(targetPort2);
@@ -102,9 +102,25 @@ public class Server implements ServerOperation {
 
 			e.printStackTrace();
 		}    
-
+*/
     }
 
+    public void regist() {
+    	
+    	
+		try {
+			registry1 = LocateRegistry.getRegistry(targetPort1);    
+			registry2 = LocateRegistry.getRegistry(targetPort2);
+
+			stub1 = (ServerOperation) registry1.lookup(targetStub1);
+			stub2 = (ServerOperation) registry2.lookup(targetStub2);
+			
+		} catch (Exception e) {
+
+			e.printStackTrace();
+		}  
+    }
+    
     public void start() {
 	
         try {
@@ -121,20 +137,31 @@ public class Server implements ServerOperation {
             System.err.println("Server exception: " + e.toString());
             e.printStackTrace();
         }
+        
         }
         
     	
     
 	@Override
 	public synchronized boolean  removeEvent(String eventID, String eventType)  throws RemoteException{
-		// TODO Auto-generated method stub
+		if(record.get(eventType).containsKey(eventID)!=true)return false;
 		HashMap<String,Integer> temp=new HashMap<String,Integer>();
 		temp.put(eventID,record.get(eventType).get(eventID));
-				
+		
 		record.remove(eventID, temp);
+		//for(HashMap<String,LinkedList<String>> o:userSchedule)
+		for (Map.Entry<String,LinkedList<String>> entry : userSchedule.entrySet()) {
+			 for(String o:userSchedule.get(entry)) {
+				if(eventID.equals(o)) {
+					userSchedule.get(entry).remove(o);
+				}
+			 }
+		    //System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+		    //res.add(entry.getKey()+" "+entry.getValue());
+		}
 		
 		System.out.println(record.get(eventType).get(eventID));
-		return false;
+		return true;
 	}
 
 
@@ -154,18 +181,24 @@ public class Server implements ServerOperation {
 	}
 	
 	@Override
-	public LinkedList<String> listEventAvailability(String eventType) throws RemoteException {
+	public synchronized LinkedList<String> listEventAvailability(String eventType) throws RemoteException {
 		
-				
+		if(!binded) {
+			this.regist();
+			binded=true;
+		}
+		
 		
 		Thread t = new Thread(new Runnable(){	//running thread which will publish record counts using UDP/sockets 
 			public void run(){
+				//while(true) {
 				try {
 					requestData(eventType);
 				} catch (NotBoundException | RemoteException e) {
 					e.printStackTrace();
 				}
 			}
+				//}
 		});
 		t.start();
 		
@@ -316,14 +349,25 @@ public class Server implements ServerOperation {
 		
 		int checkTimes=0;
 		
+		if(userSchedule.get(customerID)!=null) {
 		for(String o:userSchedule.get(customerID)) {
 			checkTimes++;
+			}
 		}
 		if(checkTimes>=3)return -1;
 	
 		//if(userSchedule.containsKey(customerID)&&userSchedule.get(customerID).contains(eventID)) return -1;
-		if(record.get(eventType).containsKey(eventID))return -2;
+		//if(record.get(eventType).containsKey(eventID))return -2;
+		if(userSchedule.containsKey(customerID)) {
 			
+			for(String s:userSchedule.get(customerID)) {
+				
+				if(s.equals(eventType+" "+eventID)) {
+					return -2;
+				}
+			}
+
+		}
 			
 		int newCapacity=record.get(eventType).get(eventID);
 		if(newCapacity==0)return -3;
@@ -337,7 +381,7 @@ public class Server implements ServerOperation {
 			
 		}else {
 			LinkedList<String> usTemp= new LinkedList<String>();
-			usTemp.add(eventID);		
+			usTemp.add(eventType+" "+eventID);		
 			userSchedule.put(customerID, usTemp);
 		}
 		

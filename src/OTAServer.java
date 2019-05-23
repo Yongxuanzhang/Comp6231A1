@@ -16,7 +16,8 @@ public static void main(String args[]) throws SecurityException, IOException {
 	OTArecord.put("Seminars", value);
 	
 	Server server = new Server("OTA",2003,OTArecord);
-	//server.start();
+	server.start();
+	//server.regist();
 
 	}
 

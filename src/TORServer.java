@@ -18,7 +18,7 @@ public static void main(String args[]) throws SecurityException, IOException {
 	TORrecord.put("Seminars", value);
 	
 	Server server = new Server("TOR",2004,TORrecord);
-	//server.start();
+	server.start();
 
 	}
 
