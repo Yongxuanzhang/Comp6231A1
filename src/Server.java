@@ -6,10 +6,13 @@ import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -49,6 +52,8 @@ public class Server implements ServerOperation {
 	//private LinkedList<String[]> userSchedule;
 	private HashMap<String,LinkedList<String>> userSchedule=new HashMap<String,LinkedList<String>>();
 	private DatagramSocket aSocket = null;
+	private FileOutputStream fileOutputStream = null;
+	private File serverFile;
 	
     public static void main(String args[]) {
 
@@ -63,6 +68,10 @@ public class Server implements ServerOperation {
     	this.location=location;
     	this.port=port;
     	this.serverLog= new Log(location+"serverOperation.txt");
+    	serverFile= new File(location+"-serverOperation.txt");
+    	 if(!serverFile.exists()){
+    		 serverFile.createNewFile();
+         }
     	this.record=newRecord;
     	receivePort1=port+3000;
     	receivePort2=port+3005;
@@ -142,10 +151,42 @@ public class Server implements ServerOperation {
         
         }
         
-    	
+    public void writeFile(String info) throws IOException {
+		 fileOutputStream = new FileOutputStream(serverFile);
+		 Date date = new Date();	 
+	     fileOutputStream.write(info.getBytes());
+	     fileOutputStream.write(date.toString().getBytes());
+	     fileOutputStream.flush();
+	     fileOutputStream.close();
+    }
     
 	@Override
-	public synchronized boolean  removeEvent(String eventID, String eventType)  throws RemoteException{
+	public boolean addEvent(String managerID, String eventID, String eventType, Integer bookingCapacity)throws RemoteException {
+		HashMap<String,Integer> rec=new HashMap<String,Integer>();
+		rec.put(eventID, bookingCapacity);
+				
+		//record.put(eventType, rec);		
+		record.get(eventType).put(eventID, bookingCapacity);
+		
+		System.out.println(record.get(eventType).get(eventID));
+		//serverLog.logger.info("test");
+		//serverLog.logger.info(managerID+" has added "+eventType+eventID+" of "+location+"Server.  ");
+		
+		 try {
+			 String tempWrite=managerID+" has added "+eventType+eventID+" of "+location+"Server";
+			 writeFile(tempWrite);
+		} catch (Exception e) {
+
+			e.printStackTrace();
+		}
+		
+		return true;
+	}
+
+
+    
+	@Override
+	public synchronized boolean removeEvent(String ID,String eventID, String eventType)  throws RemoteException{
 		if(record.get(eventType).containsKey(eventID)!=true)return false;
 		HashMap<String,Integer> temp=new HashMap<String,Integer>();
 		temp.put(eventID,record.get(eventType).get(eventID));
@@ -163,27 +204,15 @@ public class Server implements ServerOperation {
 		}
 		
 		System.out.println(record.get(eventType).get(eventID));
+		
+		serverLog.logger.info(ID+" has removed "+eventType+eventID+" of "+location+"Server");
 		return true;
 	}
 
 
-	@Override
-	public synchronized boolean addEvent(String eventID,String eventType,Integer bookingCapacity) throws RemoteException {
-		
-		HashMap<String,Integer> rec=new HashMap<String,Integer>();
-		rec.put(eventID, bookingCapacity);
-				
-		//record.put(eventType, rec);
-		
-		record.get(eventType).put(eventID, bookingCapacity);
-		
-		System.out.println(record.get(eventType).get(eventID));
-		
-		return true;
-	}
 	
 	@Override
-	public synchronized LinkedList<String> listEventAvailability(String eventType) throws RemoteException {
+	public synchronized LinkedList<String> listEventAvailability(String managerID,String eventType) throws RemoteException {
 		
 		if(!binded) {
 			this.regist();
@@ -232,7 +261,7 @@ public class Server implements ServerOperation {
 		}
 
 
-		
+		serverLog.logger.info(managerID+" has listed "+eventType+" of "+location+"Server");
 		return res;
 	}
 
@@ -463,6 +492,8 @@ public class Server implements ServerOperation {
 	public HashMap<String,HashMap<String,Integer>> getRecord(){
 		return record;
 	}
+
+
 
 
 

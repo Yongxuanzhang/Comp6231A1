@@ -97,21 +97,21 @@ public class Client extends Thread {
         String response2 = stub.sayHello2();
         System.out.println("response: " + response2);
         
-        if(stub.addEvent("OTWA100619", "Conference", 50)) {
+        if(stub.addEvent(ID,"OTWA100619", "Conference", 50)) {
         	userLog.logger.info(ID+" has added"+" OTWA100619-"+ "Conference-"+ 50);
         }else {
         	
         }
         
-        System.out.println(stub.addEvent("OTWA100619", "Conference", 50));
-        System.out.println(stub.addEvent("TORM100719","Conference",323));
-        System.out.println(stub.addEvent("OTWA101519","Seminars",43));
-        System.out.println(stub.addEvent("MTLA110519","Conference",413));
+        System.out.println(stub.addEvent(ID,"OTWA100619", "Conference", 50));
+        System.out.println(stub.addEvent(ID,"TORM100719","Conference",323));
+        System.out.println(stub.addEvent(ID,"OTWA101519","Seminars",43));
+        System.out.println(stub.addEvent(ID,"MTLA110519","Conference",413));
      
  
         //System.out.println(stub.bookEvent("TORM2345", "OTWA110519", "Conference"));
         //System.out.println(stub.bookEvent("TORM2545", "OTWA101519", "Seminars"));
-        System.out.println(stub.listEventAvailability("Conference"));
+        System.out.println(stub.listEventAvailability(ID,"Conference"));
         //System.out.println(stub.listEventAvailability("Seminars"));
         
         
