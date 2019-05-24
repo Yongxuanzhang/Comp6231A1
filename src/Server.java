@@ -43,6 +43,8 @@ public class Server implements ServerOperation {
 	private Log serverLog;
 	private ServerOperation stub1;
 	private ServerOperation stub2;
+	private String[] receiveList1=null;
+	private String[] receiveList2=null;
 	private boolean binded=false;
 	//private LinkedList<String[]> userSchedule;
 	private HashMap<String,LinkedList<String>> userSchedule=new HashMap<String,LinkedList<String>>();
@@ -216,8 +218,18 @@ public class Server implements ServerOperation {
 		System.out.println("Before receive data in "+location);
 		this.receiveData();
 		
-		
-		//multi threading
+		//String[] receiveList1;
+		if(receiveList1.length>0) {
+			for(String ts:receiveList1) {
+				res.add(ts);
+			}
+		}
+
+		if(receiveList2.length>0) {
+			for(String ts:receiveList2) {
+				res.add(ts);
+			}
+		}
 
 
 		
@@ -260,9 +272,9 @@ public class Server implements ServerOperation {
     	StringBuffer bf=new StringBuffer();
     	LinkedList<String> data=this.thisEventList(eventType);
     	
-    	bf.append("this is from"+location);
+    	//bf.append("this is from"+location);
     	for(String s:data) {
-    		bf.append(s);
+    		bf.append(s+".");
     	}
     	
     	try {
@@ -299,9 +311,13 @@ public class Server implements ServerOperation {
 			  byte[] d1=recevPacket1.getData();
 			  int dlen1 = recevPacket1.getLength();
 			  String info1 = new String(d1,0,dlen1,"UTF-8");
+			  receiveList1=info1.split("\\.");
+		
+			  
 			  byte[] d2=recevPacket2.getData();
 			  int dlen2 = recevPacket2.getLength();
-			 String info2 = new String(d2,0,dlen2,"UTF-8");
+			  String info2 = new String(d2,0,dlen2,"UTF-8");
+			  receiveList2=info2.split("\\.");
 			   System.out.println("message is "+info1);
 			   System.out.println("message is "+info2);
 			   aSocket1.close();
