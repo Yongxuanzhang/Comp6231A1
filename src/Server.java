@@ -137,7 +137,8 @@ public class Server implements ServerOperation {
         try {
            	Server obj = new Server(location,port,record);     
         	ServerOperation stub = (ServerOperation) UnicastRemoteObject.exportObject(obj, 0);
-            registry = LocateRegistry.getRegistry(port);                     
+           	
+           	registry = LocateRegistry.getRegistry(port);                     
             registry.rebind(location+"ManagerOperation", stub);
                        
             System.err.println(location+"ManagerOperation"+" has blinded");                       
