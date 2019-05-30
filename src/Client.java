@@ -86,6 +86,8 @@ public class Client extends Thread {
     	 if(res==1){
          	  System.out.println("booked successfully!");
           	  
+         }else {
+           System.out.println("Failure Code:"+res);
          }
     }
     
@@ -106,7 +108,7 @@ public class Client extends Thread {
         System.out.println(stub.addEvent(ID,"OTWA100619", "Conference", 50));
         System.out.println(stub.addEvent(ID,"TORM100719","Conference",323));
         System.out.println(stub.addEvent(ID,"OTWA101519","Seminars",43));
-        System.out.println(stub.addEvent(ID,"MTLA110519","Conference",413));
+        System.out.println(stub.addEvent(ID,"MTLA110519","Conference",2));
      
  
         //System.out.println(stub.bookEvent("TORM2345", "OTWA110519", "Conference"));
@@ -115,14 +117,14 @@ public class Client extends Thread {
         //System.out.println(stub.listEventAvailability("Seminars"));
         
         
-        callServerBookEvent("MTLM2345", "MTLA110519", "Conference");
+        callServerBookEvent(ID, "MTLA110519", "Conference");
         
-        if(stub.bookEvent("MTLM2345", "MTLA110519", "Conference")==1) {
-      	  System.out.println("booked successfully!");
+        //if(stub.bookEvent("MTLM2345", "MTLA110519", "Conference")==1) {
+      	 // System.out.println("booked successfully!");
       	  
-        }
+        //}
         
-        stub.getBookingSchedule("MTLM2345");
+        stub.getBookingSchedule(ID);
         
         for(String o : stub.getBookingSchedule("MTLM2345")) {
       	  System.out.println("MTLM2345--"+o);
@@ -161,11 +163,12 @@ public class Client extends Thread {
 		try {
 			client1 = new Client("OTAC2345");
 	        client1.start();
-	        Client client2 = new Client("MTLM2345");
+	        Client client2 = new Client("MTLM2344");
 	        client2.start();
 	        Client client3 = new Client("MTLM2345");
 	        client3.start();
-
+            Client client4 = new Client("MTLM2346");
+            client4.start();
 			
 			
 			

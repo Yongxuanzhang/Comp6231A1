@@ -404,23 +404,26 @@ public class Server implements ServerOperation {
 	
 		//if(userSchedule.containsKey(customerID)&&userSchedule.get(customerID).contains(eventID)) return -1;
 		//if(record.get(eventType).containsKey(eventID))return -2;
-		if(userSchedule.containsKey(customerID)) {
-			
-			for(String s:userSchedule.get(customerID)) {
-				
-				if(s.equals(eventType+" "+eventID)) {
-					return -2;
-				}
-			}
 
-		}
-			
+		//check capacity	
 		int newCapacity=record.get(eventType).get(eventID);
 		if(newCapacity==0)return -3;
 		else {
 			newCapacity--;
 			record.get(eventType).put(eventID, newCapacity);
 		}
+		
+		
+      if(userSchedule.containsKey(customerID)) {
+            
+            for(String s:userSchedule.get(customerID)) {
+                
+                if(s.equals(eventType+" "+eventID)) {
+                    return -2;
+                }
+            }
+
+        }
 		
 		if(userSchedule.containsKey(customerID)) {
 			userSchedule.get(customerID).add(eventID);

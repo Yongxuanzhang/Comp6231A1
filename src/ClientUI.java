@@ -172,12 +172,13 @@ public class ClientUI{
       
       System.out.println("Please Select One Manager Operation£º"); 
       
-      System.out.println("1. Add Event"); 
-      System.out.println("2. Remove Event"); 
-      System.out.println("3. List Event Availability"); 
-      System.out.println("4. Book Event"); 
-      System.out.println("5. Get BookingSchedule"); 
-      System.out.println("6. Cancel Event"); 
+      System.out.println("1. Book Event"); 
+      System.out.println("2. Get BookingSchedule"); 
+      System.out.println("3. Cancel Event"); 
+      System.out.println("4. Add Event"); 
+      System.out.println("5. Remove Event"); 
+      System.out.println("6. List Event Availability"); 
+
       
       Scanner sc = new Scanner(System.in); 
       String input = sc.nextLine();
@@ -202,12 +203,18 @@ public class ClientUI{
       
         switch(input) {
           case "1":
-            stub.addEvent(ID, "OTWA100619", "Conference", 100);
-            
             return true;
           case "2":
             return true;
           case "3":
+            return true;
+          case "4":
+            stub.addEvent(ID, "OTWA100619", "Conference", 100);
+            System.out.println(stub.addEvent(ID, "OTWA100619", "Conference", 100)); 
+            return true;
+          case "5":
+            return true;
+          case "6":
             return true;
           
         }
