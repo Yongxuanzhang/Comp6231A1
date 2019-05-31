@@ -205,19 +205,32 @@ public class Server implements ServerOperation {
 		HashMap<String,Integer> temp=new HashMap<String,Integer>();
 		temp.put(eventID,record.get(eventType).get(eventID));
 		
-		record.remove(eventID, temp);
-		//for(HashMap<String,LinkedList<String>> o:userSchedule)
-		for (Map.Entry<String,LinkedList<String>> entry : userSchedule.entrySet()) {
-			 for(String o:userSchedule.get(entry)) {
-				if(eventID.equals(o)) {
-					userSchedule.get(entry).remove(o);
-				}
-			 }
-		    //System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
-		    //res.add(entry.getKey()+" "+entry.getValue());
-		}
+		//record.remove(eventType, temp);
+		record.get(eventType).remove(eventID, record.get(eventType).get(eventID));
+		//record.remove
 		
-		System.out.println(record.get(eventType).get(eventID));
+		
+		
+		
+		//for(HashMap<String,LinkedList<String>> o:userSchedule)
+		if(userSchedule!=null) {
+			for (Map.Entry<String,LinkedList<String>> entry : userSchedule.entrySet()) {
+				
+				if(userSchedule.get(entry.getKey())!=null) {
+					 for(String o:userSchedule.get(entry.getKey())) {
+							if(eventID.equals(o)) {
+								userSchedule.get(entry.getKey()).remove(o);
+							}
+						 }
+					    //System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+					    //res.add(entry.getKey()+" "+entry.getValue());
+					}
+				}
+		}
+
+	
+		
+		//System.out.println(record.get(eventType).get(eventID));
 		
 		serverLog.logger.info(ID+" has removed "+eventType+eventID+" of "+location+"Server");
 		return true;
@@ -399,11 +412,18 @@ public class Server implements ServerOperation {
 		String eventLoc= eventID.substring(0, 3);
 		
 		if(eventLoc.equals(location)!=true) {
+			
+			int tempReturn=0;
+			
 			if(eventLoc.equals(targetStub1.substring(0, 3))) {
-				return  stub1.bookEvent(customerID, eventID, eventType);
+				tempReturn= stub1.bookEvent(customerID, eventID, eventType);
+				insertEvent(customerID,eventID,eventType);
+				return tempReturn;
 				
 			}else if(eventLoc.equals(targetStub2.substring(0, 3))) {
-				return stub2.bookEvent(customerID, eventID, eventType);
+				tempReturn=stub2.bookEvent(customerID, eventID, eventType);
+				insertEvent(customerID,eventID,eventType);
+				return tempReturn;
 				 
 			}
 			else return -4;
@@ -442,21 +462,21 @@ public class Server implements ServerOperation {
 			record.get(eventType).put(eventID, newCapacity);
 		}
 		
+		insertEvent(customerID,eventID,eventType);
+			
+		return 1;
+	}
 
-		
+	public void insertEvent(String customerID,String eventID,String  eventType) {
 		if(userSchedule.containsKey(customerID)) {
-			userSchedule.get(customerID).add(eventID);
+			userSchedule.get(customerID).add(eventType+" "+eventID);
 			
 		}else {
 			LinkedList<String> usTemp= new LinkedList<String>();
 			usTemp.add(eventType+" "+eventID);		
 			userSchedule.put(customerID, usTemp);
 		}
-		
-		
-		return 1;
 	}
-
 
 	public synchronized boolean cancelEvent(String eventID, String customerID) throws RemoteException {
 
@@ -494,7 +514,11 @@ public class Server implements ServerOperation {
 	@Override
 	public LinkedList<String> getBookingSchedule(String customerID) throws RemoteException {
 		// TODO Auto-generated method stub
-		return userSchedule.get(customerID);
+		if(!userSchedule.containsKey(customerID)) {
+			return null;
+		}
+		else return userSchedule.get(customerID);
+		
 	}
 
 

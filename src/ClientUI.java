@@ -12,6 +12,7 @@ public class ClientUI{
     private String ID;
     private String bindobj;
     private Registry registry;
+    private String location;
     private ServerOperation stub;
     private Log userLog;
     private HashMap<String,String> userInfo=new HashMap<String,String>();
@@ -32,127 +33,7 @@ public class ClientUI{
       userInfo.put("OTWC2345", "123");
     }
 
-    
-    public void run() {
-        
-        String location = ID.substring(0, 3);
-        
-        switch(location) {
-        
-        case"MTL":
-            host=2002;
-            bindobj="MTLManagerOperation";
-            break;
-        case"OTW":
-            host=2003;
-            bindobj="OTWManagerOperation";
-            break;
-        case"TOR":
-            host=2004;
-            bindobj="TORManagerOperation";
-            break;
-        default:
-            System.out.println("Wrong ID");
-    
-        }
-        
-        
-          try {
-              registry = LocateRegistry.getRegistry(host);              
-              
-              stub = (ServerOperation) registry.lookup(bindobj);
-                      
-          } catch (Exception e) {
-              System.err.println("Client exception: " + e.toString());
-              e.printStackTrace();
-          }
-          
-          
-        String type = ID.substring(3, 4);
-        
-        if(type.equals("M")) {
-            managerOperation();
-        }
-        else if(type.equals("C")) {
-            
-        }else {
-            System.out.println("Wrong ID");
-        }
-        
-          
-    
-    }
-    
-
-    
-    
-    public void callServerBookEvent(String customerID,String eventID,String eventType) throws RemoteException {
-        
-        int res=stub.bookEvent(customerID, eventID, eventType);
-        System.out.println("booked "+res);
-         if(res==1){
-              System.out.println("booked successfully!");
-              
-         }
-    }
-    
-    public void managerOperation() {
-          //String response = stub.sayHello();
-        //System.out.println("response: " + response);
-        
-        try {
-        String response2 = stub.sayHello2();
-        System.out.println("response: " + response2);
-        
-        if(stub.addEvent(ID,"OTWA100619", "Conference", 50)) {
-            userLog.logger.info(ID+" has added"+" OTWA100619-"+ "Conference-"+ 50);
-        }else {
-            
-        }
-        
-        System.out.println(stub.addEvent(ID,"OTWA100619", "Conference", 50));
-        System.out.println(stub.addEvent(ID,"TORM100719","Conference",323));
-        System.out.println(stub.addEvent(ID,"OTWA101519","Seminars",43));
-        System.out.println(stub.addEvent(ID,"MTLA110519","Conference",413));
-     
- 
-        //System.out.println(stub.bookEvent("TORM2345", "OTWA110519", "Conference"));
-        //System.out.println(stub.bookEvent("TORM2545", "OTWA101519", "Seminars"));
-        System.out.println(stub.listEventAvailability(ID,"Conference"));
-        //System.out.println(stub.listEventAvailability("Seminars"));
-        
-        
-        callServerBookEvent("MTLM2345", "MTLA110519", "Conference");
-        
-        if(stub.bookEvent("MTLM2345", "MTLA110519", "Conference")==1) {
-          System.out.println("booked successfully!");
-          
-        }
-        
-        stub.getBookingSchedule("MTLM2345");
-        
-        for(String o : stub.getBookingSchedule("MTLM2345")) {
-          System.out.println("MTLM2345--"+o);
-        }
-
-        
-        //System.out.println(stub.removeEvent("21312","Conference"));
-        
-       // System.out.println(stub.listEventAvailability("Conference"));
-        
-        /*
-        LinkedList<String> res= new LinkedList<String>();
-        res = stub.listEventAvailability("Conference");
-        
-        for(String obj : res) {
-          System.out.println("The res are:"+obj);
-        }*/
-        } catch (Exception e) {
-            System.err.println("Client exception: " + e.toString());
-            e.printStackTrace();
-        }
-    
-    }
+  
     
     private boolean checkUser(String ID,String pw) {
       
@@ -218,7 +99,8 @@ public class ClientUI{
 
 	          int bookRes=stub.bookEvent(customerID, eventID, eventType);
 	          
-	
+	          System.out.println("res is "+bookRes); 
+              
 	          if(bookRes==1) {
 	              System.out.println("Booked successfully."); 
 	              
@@ -231,17 +113,23 @@ public class ClientUI{
 	          	 System.out.println("Customer "+ customerID+" Already booked this event."); 
 	             
 	          	 return false;
+	          }else {
+	        	  System.out.println("Wrong Input.");
+	        	  return false;
 	          }
 	     
           case "2":
         	  sct = new Scanner(System.in);
         	  System.out.println("Please Enter Customer ID:");         	  
 	          customerID = sct.nextLine(); 
-	          System.out.println("Please Enter Event ID:"); 
-	          eventID = sct.nextLine(); 
 
-	          if(stub.cancelEvent(eventID, customerID)) {
-	              System.out.println("Canceled successfully."); 
+
+	          if(stub.getBookingSchedule(customerID)!=null) {
+	              //System.out.println(stub.getBookingSchedule(customerID)); 
+	              
+	              for(String o:stub.getBookingSchedule(customerID)) {
+	            	     System.out.println(o); 
+	              }
 	              
 	              return true;
 	          }else{
@@ -276,6 +164,12 @@ public class ClientUI{
 	            System.out.println("Please Enter Booking Capacity:"); 
 	            bookingCapacity = sct.nextInt(); 
             
+	            if(!eventID.substring(0, 3).equals(location)) {
+	            	 //System.out.println(eventID.substring(0, 3)+" "+location); 
+	            	  System.out.println("Wrong Event ID Format."); 
+	            	  return false;
+	            }
+	            
 	            if(stub.addEvent(ID, eventID, eventType, bookingCapacity)) {
 	                System.out.println("Booked successfully."); 
 	                
@@ -330,7 +224,7 @@ public class ClientUI{
     }
     
     private void login() {
-      String location = ID.substring(0, 3);
+      location = ID.substring(0, 3);
       
       switch(location) {
       
