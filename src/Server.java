@@ -397,6 +397,8 @@ public class Server implements ServerOperation {
 		 * -1:Book more than 3 events in 1 month from other servers;
 		 * -2:Same eventID and eventType;
 		 * -3:The capacity is full;
+		 * -4:Location Error;
+		 * -5:Event doesn't exist;
 		 * 
 		 */
 		//userSchedule.addAll(customerID, eventID);
@@ -407,6 +409,8 @@ public class Server implements ServerOperation {
 		System.out.println(customerID);
 		System.out.println(userSchedule.containsKey(customerID)+" -- ");
 		
+		if(!record.containsKey(eventType))return -6;
+	
 		
 	
 		String eventLoc= eventID.substring(0, 3);
@@ -428,7 +432,7 @@ public class Server implements ServerOperation {
 			}
 			else return -4;
 		}
-		
+		if(!record.get(eventType).containsKey(eventID))return -5;
 		int checkTimes=0;
 		
 		if(userSchedule.get(customerID)!=null) {
@@ -478,14 +482,15 @@ public class Server implements ServerOperation {
 		}
 	}
 
-	public synchronized boolean cancelEvent(String eventID, String customerID) throws RemoteException {
+	public synchronized boolean cancelEvent(String eventID,String eventType, String customerID) throws RemoteException {
 
 		boolean result=false;//else return false;
 		System.out.println("value of uc "+userSchedule.containsKey(customerID));
-		
-		if(userSchedule.containsKey(customerID)) {
-			userSchedule.get(customerID).remove(eventID);
+		System.out.println("value of ucID "+userSchedule.get(customerID).contains(eventType+" "+eventID));
+		if(userSchedule.containsKey(customerID)&&userSchedule.get(customerID).contains(eventType+" "+eventID)) {
+			userSchedule.get(customerID).remove(eventType+" "+eventID);
 			
+			//userSchedule.get(customerID).re
 			for (Map.Entry<String,HashMap<String,Integer>> entry : record.entrySet()) {
 				
 				for(Map.Entry<String,Integer> entry2 : entry.getValue().entrySet()) {
@@ -493,7 +498,9 @@ public class Server implements ServerOperation {
 					
 					if(entry2.getKey().equals(eventID)) {
 						
-						record.get(entry.getKey()).remove(eventID, entry2.getValue());
+						//record.get(entry.getKey()).remove(eventID, entry2.getValue());
+						
+						
 						int tc=entry2.getValue()+1;
 						record.get(entry.getKey()).put(eventID, tc);
 						result=true;

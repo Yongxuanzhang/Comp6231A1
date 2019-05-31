@@ -63,8 +63,8 @@ public class ClientUI{
       System.out.println("**********************************"); 
       Scanner sc = new Scanner(System.in); 
       String input = sc.nextLine();
-      
-      System.out.println(operate(input)); 
+      operateM(input);
+     // System.out.println(operate(input)); 
     }
     
     public void cOperation() throws RemoteException {
@@ -77,11 +77,105 @@ public class ClientUI{
       System.out.println("**********************************"); 
       Scanner sc = new Scanner(System.in); 
       String input = sc.nextLine();
-     
-      System.out.println(operate(input)); 
+      operateC(input);
+      //System.out.println(operate(input)); 
     }
  
-    public boolean operate(String input) throws RemoteException {
+    public boolean operateC(String input) throws RemoteException {
+    	Scanner sct;
+    	String eventID;
+    	String eventType;
+    	String customerID;
+    	int bookingCapacity;
+        switch(input) {
+          case "1":          	
+        	  sct = new Scanner(System.in);
+        	  //System.out.println("Please Enter Customer ID:");         	  
+	          customerID = this.ID; 
+	          System.out.println("Please Enter Event ID:"); 
+	          eventID = sct.nextLine(); 
+	          System.out.println("Please Enter Event Type:"); 
+	          eventType = sct.nextLine(); 
+
+	          int bookRes=stub.bookEvent(customerID, eventID, eventType);
+	          
+	          //System.out.println("res is "+bookRes); 
+              
+	          if(bookRes==1) {
+	              System.out.println("Booked successfully."); 
+	              
+	              return true;
+	          }else if(bookRes==-3) {
+	          	 System.out.println("Capacity is full."); 
+	             
+	          	 return false;
+	          }else if(bookRes==-2) {
+	          	 System.out.println("Customer "+ customerID+" Already booked this event."); 
+	             
+	          	 return false;
+	          }else if(bookRes==-5) {
+		          	 System.out.println("Event doesn't exist"); 
+		             
+		          	 return false;
+	          }else if(bookRes==-6) {
+		          	 System.out.println("Wrong type"); 
+		             
+		          	 return false;
+		          }
+	          else {
+	        	  System.out.println("Wrong Input.");
+	        	  return false;
+	          }
+	     
+          case "2":
+        	  sct = new Scanner(System.in);
+        	 // System.out.println("Please Enter Customer ID:");         	  
+	         // customerID = sct.nextLine(); 
+
+	          customerID = this.ID; 
+	          if(stub.getBookingSchedule(customerID)!=null) {
+	              //System.out.println(stub.getBookingSchedule(customerID)); 
+	              
+	              for(String o:stub.getBookingSchedule(customerID)) {
+	            	     System.out.println(o); 
+	              }
+	              
+	              return true;
+	          }else{
+	          	 System.out.println("Failure."); 
+	             
+	          	 return false;
+	          }
+        	  
+          case "3":
+        	  sct = new Scanner(System.in);
+        	  //System.out.println("Please Enter Customer ID:");         	  
+        	  customerID = this.ID; 
+	          System.out.println("Please Enter Event ID:"); 
+	          eventID = sct.nextLine(); 
+              System.out.println("Please Enter Event Type:"); 
+              eventType = sct.nextLine(); 	
+	          if(stub.cancelEvent(eventID,eventType,customerID)) {
+	              System.out.println("Canceled successfully."); 
+	              
+	              return true;
+	          }else{
+	          	 System.out.println("Failure."); 
+	             
+	          	 return false;
+	          }
+
+          case "E":
+        	  opFlag=false;
+        	  break;
+          case "e":
+        	  opFlag=false;
+        	  break;
+        }
+        return false;
+        }
+    
+    public boolean operateM(String input) throws RemoteException {
     	Scanner sct;
     	String eventID;
     	String eventType;
@@ -99,7 +193,7 @@ public class ClientUI{
 
 	          int bookRes=stub.bookEvent(customerID, eventID, eventType);
 	          
-	          System.out.println("res is "+bookRes); 
+	          //System.out.println("res is "+bookRes); 
               
 	          if(bookRes==1) {
 	              System.out.println("Booked successfully."); 
@@ -113,7 +207,12 @@ public class ClientUI{
 	          	 System.out.println("Customer "+ customerID+" Already booked this event."); 
 	             
 	          	 return false;
-	          }else {
+	          }else if(bookRes==-5) {
+		          	 System.out.println("Event doesn't exist"); 
+		             
+		          	 return false;
+		          }
+	          else {
 	        	  System.out.println("Wrong Input.");
 	        	  return false;
 	          }
@@ -144,8 +243,10 @@ public class ClientUI{
 	          customerID = sct.nextLine(); 
 	          System.out.println("Please Enter Event ID:"); 
 	          eventID = sct.nextLine(); 
-
-	          if(stub.cancelEvent(eventID, customerID)) {
+              System.out.println("Please Enter Event Type:"); 
+              eventType = sct.nextLine(); 	
+              
+	          if(stub.cancelEvent(eventID,eventType,customerID)) {
 	              System.out.println("Canceled successfully."); 
 	              
 	              return true;

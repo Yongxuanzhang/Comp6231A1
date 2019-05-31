@@ -14,7 +14,7 @@ public interface ServerOperation extends Remote {
     LinkedList<String> listEventAvailability(String managerID,String eventType)throws RemoteException ;
     
     int bookEvent(String customerID,String eventID,String eventType) throws RemoteException;
-    boolean cancelEvent (String eventID, String customerID)throws RemoteException;
+    boolean cancelEvent (String eventID,String eventType, String customerID)throws RemoteException;
     LinkedList<String>  getBookingSchedule (String customerID)throws RemoteException;
     
 }
