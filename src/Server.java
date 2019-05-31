@@ -30,13 +30,14 @@ public class Server implements ServerOperation {
 	
 	
 	private HashMap<String,HashMap<String,Integer>> record=new HashMap<String,HashMap<String,Integer>>();
+	private HashMap<String,LinkedList<String>> userSchedule=new HashMap<String,LinkedList<String>>();
 	private int port;
 	private int receivePort1;
 	private int receivePort2;
-	private String targetStub1;
-	private String targetStub2;
 	private int targetPort1;
 	private int targetPort2;
+	private String targetStub1;
+	private String targetStub2;
 	private DatagramSocket aSocket1;
 	private DatagramSocket aSocket2;
 	private String location;
@@ -49,8 +50,8 @@ public class Server implements ServerOperation {
 	private String[] receiveList1=null;
 	private String[] receiveList2=null;
 	private boolean binded=false;
-	//private LinkedList<String[]> userSchedule;
-	private HashMap<String,LinkedList<String>> userSchedule=new HashMap<String,LinkedList<String>>();
+
+
 	private DatagramSocket aSocket = null;
 	private FileOutputStream fileOutputStream = null;
 	private File serverFile;
@@ -80,7 +81,7 @@ public class Server implements ServerOperation {
     	switch(port){
  
     	case 2002:
-    		this.targetStub1="OTAManagerOperation";
+    		this.targetStub1="OTWManagerOperation";
     		this.targetStub2="TORManagerOperation"; 
     		targetPort1=2003;
     		targetPort2=2004;
@@ -92,7 +93,7 @@ public class Server implements ServerOperation {
     		targetPort2=2004;
     		break;	
     	case 2004:
-    		this.targetStub1="OTAManagerOperation";
+    		this.targetStub1="OTWManagerOperation";
     		this.targetStub2="MTLManagerOperation";
     		targetPort1=2003;
     		targetPort2=2002;
@@ -164,31 +165,43 @@ public class Server implements ServerOperation {
 	@Override
 	public boolean addEvent(String managerID, String eventID, String eventType, Integer bookingCapacity)throws RemoteException {
 		HashMap<String,Integer> rec=new HashMap<String,Integer>();
-		rec.put(eventID, bookingCapacity);
-				
-		//record.put(eventType, rec);		
-		record.get(eventType).put(eventID, bookingCapacity);
 		
-		System.out.println(record.get(eventType).get(eventID));
-		//serverLog.logger.info("test");
-		//serverLog.logger.info(managerID+" has added "+eventType+eventID+" of "+location+"Server.  ");
 		
-		 try {
-			 String tempWrite=managerID+" has added "+eventType+eventID+" of "+location+"Server";
-			 writeFile(tempWrite);
-		} catch (Exception e) {
+		if(!record.containsKey(eventType))return false;
+		else {
+			
+			rec.put(eventID, bookingCapacity);
+			
+			//record.put(eventType, rec);		
+			record.get(eventType).put(eventID, bookingCapacity);
+			
+			System.out.println(record.get(eventType).get(eventID));
+			//serverLog.logger.info("test");
+			//serverLog.logger.info(managerID+" has added "+eventType+eventID+" of "+location+"Server.  ");
+			
+			 try {
+				 String tempWrite=managerID+" has added "+eventType+eventID+" of "+location+"Server";
+				 writeFile(tempWrite);
+			} catch (Exception e) {
 
-			e.printStackTrace();
+				e.printStackTrace();
+			}
+			
+			return true;
 		}
 		
-		return true;
+		
+
 	}
 
 
     
 	@Override
 	public synchronized boolean removeEvent(String ID,String eventID, String eventType)  throws RemoteException{
-		if(record.get(eventType).containsKey(eventID)!=true)return false;
+		if(!record.containsKey(eventType)||!record.get(eventType).containsKey(eventID))return false;
+		//if(record.get(eventType).containsKey(eventID)!=true)return false;
+		
+		
 		HashMap<String,Integer> temp=new HashMap<String,Integer>();
 		temp.put(eventID,record.get(eventType).get(eventID));
 		
@@ -220,6 +233,7 @@ public class Server implements ServerOperation {
 			binded=true;
 		}
 		
+		if(!record.containsKey(eventType))return null;
 		
 		Thread t = new Thread(new Runnable(){	//running thread which will publish record counts using UDP/sockets 
 			public void run(){
@@ -386,9 +400,11 @@ public class Server implements ServerOperation {
 		
 		if(eventLoc.equals(location)!=true) {
 			if(eventLoc.equals(targetStub1.substring(0, 3))) {
-				stub1.bookEvent(customerID, eventID, eventType);
+				return  stub1.bookEvent(customerID, eventID, eventType);
+				
 			}else if(eventLoc.equals(targetStub2.substring(0, 3))) {
-				stub2.bookEvent(customerID, eventID, eventType);
+				return stub2.bookEvent(customerID, eventID, eventType);
+				 
 			}
 			else return -4;
 		}
@@ -405,6 +421,19 @@ public class Server implements ServerOperation {
 		//if(userSchedule.containsKey(customerID)&&userSchedule.get(customerID).contains(eventID)) return -1;
 		//if(record.get(eventType).containsKey(eventID))return -2;
 
+		
+	      if(userSchedule.containsKey(customerID)) {
+	            
+	            for(String s:userSchedule.get(customerID)) {
+	                
+	                if(s.equals(eventType+" "+eventID)) {
+	                    return -2;
+	                }
+	            }
+
+	        }
+		
+		
 		//check capacity	
 		int newCapacity=record.get(eventType).get(eventID);
 		if(newCapacity==0)return -3;
@@ -413,17 +442,7 @@ public class Server implements ServerOperation {
 			record.get(eventType).put(eventID, newCapacity);
 		}
 		
-		
-      if(userSchedule.containsKey(customerID)) {
-            
-            for(String s:userSchedule.get(customerID)) {
-                
-                if(s.equals(eventType+" "+eventID)) {
-                    return -2;
-                }
-            }
 
-        }
 		
 		if(userSchedule.containsKey(customerID)) {
 			userSchedule.get(customerID).add(eventID);
@@ -440,20 +459,29 @@ public class Server implements ServerOperation {
 
 
 	public synchronized boolean cancelEvent(String eventID, String customerID) throws RemoteException {
-		/*
-		for(String[] o: userSchedule) {
-			
-			if(o[0].equalsIgnoreCase(eventID)&o[1].equalsIgnoreCase(customerID)) {
-				userSchedule.remove(o);
-				return true;
-			}
-		
-		}
-		*/
+
+		boolean result=false;//else return false;
+		System.out.println("value of uc "+userSchedule.containsKey(customerID));
 		
 		if(userSchedule.containsKey(customerID)) {
 			userSchedule.get(customerID).remove(eventID);
 			
+			for (Map.Entry<String,HashMap<String,Integer>> entry : record.entrySet()) {
+				
+				for(Map.Entry<String,Integer> entry2 : entry.getValue().entrySet()) {
+					System.out.println("value of e2 "+(entry2.getKey()));
+					
+					if(entry2.getKey().equals(eventID)) {
+						
+						record.get(entry.getKey()).remove(eventID, entry2.getValue());
+						int tc=entry2.getValue()+1;
+						record.get(entry.getKey()).put(eventID, tc);
+						result=true;
+					}
+				}
+			}
+			
+			if(!result)return false;
 			
 			return true;
 		}else {

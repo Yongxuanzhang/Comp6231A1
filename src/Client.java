@@ -12,6 +12,7 @@ public class Client extends Thread {
 	private Registry registry;
 	private ServerOperation stub;
 	private Log userLog;
+
 	
     private Client(String ID) throws SecurityException, IOException {
     	this.ID=ID;
@@ -33,9 +34,9 @@ public class Client extends Thread {
     		host=2002;
     		bindobj="MTLManagerOperation";
     		break;
-      	case"OTA":
+      	case"OTW":
     		host=2003;
-    		bindobj="OTAManagerOperation";
+    		bindobj="OTWManagerOperation";
     		break;
       	case"TOR":
     		host=2004;
@@ -64,7 +65,7 @@ public class Client extends Thread {
       		managerOperation();
       	}
       	else if(type.equals("C")) {
-      		
+      		//TODO
       	}else {
       		System.out.println("Wrong ID");
       	}
@@ -161,7 +162,7 @@ public class Client extends Thread {
         
     	Client client1;
 		try {
-			client1 = new Client("OTAC2345");
+			client1 = new Client("OTWC2345");
 	        client1.start();
 	        Client client2 = new Client("MTLM2344");
 	        client2.start();

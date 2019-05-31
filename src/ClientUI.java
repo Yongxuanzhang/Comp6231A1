@@ -15,8 +15,8 @@ public class ClientUI{
     private ServerOperation stub;
     private Log userLog;
     private HashMap<String,String> userInfo=new HashMap<String,String>();
-    
-    
+	private boolean opFlag=true;
+	private Scanner sc = new Scanner(System.in); 
     
     private ClientUI() throws SecurityException, IOException {       
         userLog=new Log(ID+"-userLog.txt");
@@ -24,12 +24,12 @@ public class ClientUI{
     }
     
     private void userInfoStart() {
-      
+      //User data in client side.
       userInfo.put("MTLM2345", "123");
       userInfo.put("MTLC2345", "123");
       userInfo.put("TORM2345", "123");
-      userInfo.put("OTAM2345", "123");
-      userInfo.put("OTAC2345", "123");
+      userInfo.put("OTWM2345", "123");
+      userInfo.put("OTWC2345", "123");
     }
 
     
@@ -43,9 +43,9 @@ public class ClientUI{
             host=2002;
             bindobj="MTLManagerOperation";
             break;
-        case"OTA":
+        case"OTW":
             host=2003;
-            bindobj="OTAManagerOperation";
+            bindobj="OTWManagerOperation";
             break;
         case"TOR":
             host=2004;
@@ -170,16 +170,16 @@ public class ClientUI{
     
     public void mOperation() throws RemoteException {
       
-      System.out.println("Please Select One Manager Operation£º"); 
-      
+      System.out.println("**********************************"); 
+      System.out.println("Please Select One Manager Operation:");       
       System.out.println("1. Book Event"); 
       System.out.println("2. Get BookingSchedule"); 
       System.out.println("3. Cancel Event"); 
       System.out.println("4. Add Event"); 
       System.out.println("5. Remove Event"); 
       System.out.println("6. List Event Availability"); 
-
-      
+      System.out.println("E for Exit"); 
+      System.out.println("**********************************"); 
       Scanner sc = new Scanner(System.in); 
       String input = sc.nextLine();
       
@@ -187,12 +187,13 @@ public class ClientUI{
     }
     
     public void cOperation() throws RemoteException {
-      
-      System.out.println("Please Select One Customer Operation£º"); 
+      System.out.println("**********************************"); 
+      System.out.println("Please Select One Customer Operation:"); 
       System.out.println("1. Book Event"); 
       System.out.println("2. Get BookingSchedule"); 
       System.out.println("3. Cancel Event"); 
-      
+      System.out.println("E for Exit"); 
+      System.out.println("**********************************"); 
       Scanner sc = new Scanner(System.in); 
       String input = sc.nextLine();
      
@@ -200,22 +201,127 @@ public class ClientUI{
     }
  
     public boolean operate(String input) throws RemoteException {
-      
+    	Scanner sct;
+    	String eventID;
+    	String eventType;
+    	String customerID;
+    	int bookingCapacity;
         switch(input) {
-          case "1":
-            return true;
+          case "1":          	
+        	  sct = new Scanner(System.in);
+        	  System.out.println("Please Enter Customer ID:");         	  
+	          customerID = sct.nextLine(); 
+	          System.out.println("Please Enter Event ID:"); 
+	          eventID = sct.nextLine(); 
+	          System.out.println("Please Enter Event Type:"); 
+	          eventType = sct.nextLine(); 
+
+	          int bookRes=stub.bookEvent(customerID, eventID, eventType);
+	          
+	
+	          if(bookRes==1) {
+	              System.out.println("Booked successfully."); 
+	              
+	              return true;
+	          }else if(bookRes==-3) {
+	          	 System.out.println("Capacity is full."); 
+	             
+	          	 return false;
+	          }else if(bookRes==-2) {
+	          	 System.out.println("Customer "+ customerID+" Already booked this event."); 
+	             
+	          	 return false;
+	          }
+	     
           case "2":
-            return true;
+        	  sct = new Scanner(System.in);
+        	  System.out.println("Please Enter Customer ID:");         	  
+	          customerID = sct.nextLine(); 
+	          System.out.println("Please Enter Event ID:"); 
+	          eventID = sct.nextLine(); 
+
+	          if(stub.cancelEvent(eventID, customerID)) {
+	              System.out.println("Canceled successfully."); 
+	              
+	              return true;
+	          }else{
+	          	 System.out.println("Failure."); 
+	             
+	          	 return false;
+	          }
+        	  
           case "3":
-            return true;
+        	  sct = new Scanner(System.in);
+        	  System.out.println("Please Enter Customer ID:");         	  
+	          customerID = sct.nextLine(); 
+	          System.out.println("Please Enter Event ID:"); 
+	          eventID = sct.nextLine(); 
+
+	          if(stub.cancelEvent(eventID, customerID)) {
+	              System.out.println("Canceled successfully."); 
+	              
+	              return true;
+	          }else{
+	          	 System.out.println("Failure."); 
+	             
+	          	 return false;
+	          }
           case "4":
-            stub.addEvent(ID, "OTWA100619", "Conference", 100);
-            System.out.println(stub.addEvent(ID, "OTWA100619", "Conference", 100)); 
-            return true;
-          case "5":
-            return true;
+
+	        	sct = new Scanner(System.in);
+	            System.out.println("Please Enter Event ID:"); 
+	            eventID = sct.nextLine(); 
+	            System.out.println("Please Enter Event Type:"); 
+	            eventType = sct.nextLine(); 
+	            System.out.println("Please Enter Booking Capacity:"); 
+	            bookingCapacity = sct.nextInt(); 
+            
+	            if(stub.addEvent(ID, eventID, eventType, bookingCapacity)) {
+	                System.out.println("Booked successfully."); 
+	                
+	                return true;
+	            }else {
+	            	 System.out.println("Wrong Input."); 
+	                 
+	            	 return false;
+	            }
+	            
+          case "5":            
+	          	  sct = new Scanner(System.in); 
+	              System.out.println("Please Enter Event ID:"); 
+	              eventID = sct.nextLine(); 
+	              System.out.println("Please Enter Event Type:"); 
+	              eventType = sct.nextLine(); 	             	              
+	              if(stub.removeEvent(ID, eventID, eventType)) {
+	                  System.out.println("Removed successfully."); 
+	                  
+	                  return true;
+	              }else {
+	              	 System.out.println("Wrong Input."); 
+	                 
+	              	 return false;
+	              }   
+	              
           case "6":
-            return true;
+	        	  sct = new Scanner(System.in); 
+	              System.out.println("Please Enter Event Type:"); 
+	              eventType = sct.nextLine(); 
+	              
+	              if(stub.listEventAvailability(ID,eventType)!=null) {
+	            	  System.out.println(eventType+stub.listEventAvailability(ID,eventType));
+	              }else {
+	               	 System.out.println("Wrong Input."); 
+	                 
+	               	 return false;
+	              }            	
+	              
+	            return true;
+          case "E":
+        	  opFlag=false;
+        	  break;
+          case "e":
+        	  opFlag=false;
+        	  break;
           
         }
         
@@ -232,9 +338,9 @@ public class ClientUI{
           host=2002;
           bindobj="MTLManagerOperation";
           break;
-      case"OTA":
+      case"OTW":
           host=2003;
-          bindobj="OTAManagerOperation";
+          bindobj="OTWManagerOperation";
           break;
       case"TOR":
           host=2004;
@@ -265,22 +371,25 @@ public class ClientUI{
       
       while(inRun){
         Scanner sc = new Scanner(System.in); 
-        System.out.println("Please Enter Your ID£º"); 
+        System.out.println("Please Enter Your ID:"); 
         String userID = sc.nextLine(); 
-        System.out.println("Please Enter Your Passward£º"); 
+        System.out.println("Please Enter Your Passward:"); 
         String password = sc.nextLine(); 
         
         if(this.checkUser(userID, password)==true) {
-          System.out.println("Sucessfully Login in£º"); 
-          System.out.println("Name£º"+userID+"\n");
+          System.out.println("Sucessfully Login in:"); 
+          System.out.println("Name:"+userID+"\n");
           inRun=false;
           
           this.ID=userID;
           this.login();
           String userType=userID.substring(3, 4);
 
-          if(userType.equals("M"))this.mOperation();
-          if(userType.equals("C"))this.cOperation();
+          while(opFlag) {
+              if(userType.equals("M"))this.mOperation();
+              if(userType.equals("C"))this.cOperation();
+          }
+
           
           
         }else {
