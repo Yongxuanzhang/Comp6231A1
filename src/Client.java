@@ -118,8 +118,8 @@ public class Client extends Thread {
         //System.out.println(stub.listEventAvailability("Seminars"));
         
         
-        callServerBookEvent(ID, "MTLA110519", "Conference");
-        
+        callServerBookEvent(ID, "MTLA100619", "Conference");
+        System.out.println(stub.listEventAvailability(ID,"Conference"));
         //if(stub.bookEvent("MTLM2345", "MTLA110519", "Conference")==1) {
       	 // System.out.println("booked successfully!");
       	  
@@ -127,8 +127,11 @@ public class Client extends Thread {
         
         stub.getBookingSchedule(ID);
         
-        for(String o : stub.getBookingSchedule("MTLM2345")) {
-      	  System.out.println("MTLM2345--"+o);
+        if(stub.getBookingSchedule(ID)!=null) {
+          for(String o : stub.getBookingSchedule(ID)) {
+            System.out.println(ID+o);
+          }
+
         }
 
         

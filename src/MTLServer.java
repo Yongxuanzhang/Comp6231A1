@@ -16,7 +16,7 @@ public static void main(String args[]) throws SecurityException, IOException {
 		
 	HashMap<String,Integer>value=new HashMap<String,Integer>();
 	
-	value.put("MTLA100619", 21);
+	value.put("MTLA100619", 2);
 	
 	MTLrecord.put("Conference", value);
 	MTLrecord.put("Trade shows", value);

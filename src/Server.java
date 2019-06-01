@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 
 	
 	/**
@@ -34,13 +35,20 @@ public class Server implements ServerOperation {
 	private int port;
 	private int receivePort1;
 	private int receivePort2;
+	private int requestPort1;
+	private int requestPort2;
+	private int listenPort1;
+	private int listenPort2;
 	private int targetPort1;
 	private int targetPort2;
 	private String targetStub1;
 	private String targetStub2;
 	private DatagramSocket aSocket1;
 	private DatagramSocket aSocket2;
+    private DatagramSocket aSocket3=null;
+    private DatagramSocket aSocket4=null;
 	private String location;
+	private String sendEventType;
 	private Registry registry;
 	private Registry registry1;    
 	private Registry registry2;
@@ -56,6 +64,9 @@ public class Server implements ServerOperation {
 	private FileOutputStream fileOutputStream = null;
 	private File serverFile;
 	
+    private DatagramSocket socket1 = null;
+    private DatagramSocket socket2 = null;
+
     public static void main(String args[]) {
 
   
@@ -77,46 +88,160 @@ public class Server implements ServerOperation {
     	receivePort1=port+3000;
     	receivePort2=port+3005;
     	
-    	
+        listenPort1=port+4000;
+        listenPort2=port+4005;
+        
+
+        
+        
     	switch(port){
  
     	case 2002:
     		this.targetStub1="OTWManagerOperation";
     		this.targetStub2="TORManagerOperation"; 
-    		targetPort1=2003;
-    		targetPort2=2004;
+    		targetPort1=5003;
+    		targetPort2=5007;
+    		requestPort1=6003;
+    		requestPort2=6004;
     		break;
     	case 2003:
     		this.targetStub1="MTLManagerOperation";
     		this.targetStub2="TORManagerOperation";
-    		targetPort1=2002;
-    		targetPort2=2004;
+    		targetPort1=5002;
+    		targetPort2=5009;
+            requestPort1=6002;
+            requestPort2=6004;
     		break;	
     	case 2004:
     		this.targetStub1="OTWManagerOperation";
     		this.targetStub2="MTLManagerOperation";
-    		targetPort1=2003;
-    		targetPort2=2002;
+    		targetPort1=5007;
+    		targetPort2=5008;
+            requestPort1=6002;
+            requestPort2=6003;
     		break;
     		
     	
     		
     	}
-/*
-		try {
-			registry1 = LocateRegistry.getRegistry(targetPort1);    
-			registry2 = LocateRegistry.getRegistry(targetPort2);
+    	
 
-			stub1 = (ServerOperation) registry1.lookup(targetStub1);
-			stub2 = (ServerOperation) registry2.lookup(targetStub2);
-			
-		} catch (Exception e) {
-
-			e.printStackTrace();
-		}    
-*/
     }
 
+    
+    public boolean listenUDPt() {
+      System.out.println("Ut run");
+
+      boolean res=false;
+          
+          try {
+            //System.out.println(socket1);
+            //if(!socket1.isBound()) {
+              socket1 = new DatagramSocket(listenPort1);
+              
+            //}
+            //if(!socket2.isBound()) {
+             // socket2 = new DatagramSocket(listenPort2);
+            //}
+          
+             byte[] data1= new byte[1000];
+             byte[] data2= new byte[1000];
+             DatagramPacket recevPacket1 = new DatagramPacket(data1,data1.length);
+             DatagramPacket recevPacket2 = new DatagramPacket(data2,data2.length);
+             System.out.println("before receive in udpt");
+             socket1.receive(recevPacket1);
+            // socket2.receive(recevPacket2);
+             System.out.println("after receive in udpt");
+             
+             
+             byte[] d=recevPacket1.getData();
+             int dlen = recevPacket1.getLength();
+             String info = new String(d,0,dlen,"UTF-8");
+             System.out.println("UDPt1"+info);
+             
+             byte[] d2=recevPacket2.getData();
+             int dlen2 = recevPacket2.getLength();
+             String info2 = new String(d2,0,dlen2,"UTF-8");
+             //System.out.println("UDPt2"+info2);
+             
+             if(info.equals("Conference")||info.equals("Seminars")||info.equals("Trade shows")) {
+               
+               this.sendData(info, targetPort1);
+               this.sendData(info, targetPort2);
+               res=true;
+             }
+        
+             //Change to UDP.
+             //TODO:1.book event from other server(Modity stub).2.
+             
+             
+          } catch ( IOException e) {
+              
+              e.printStackTrace();
+          }finally {
+            socket1.close();
+            listenUDPt();
+          }
+          
+          return res;
+      
+    }
+
+    
+    public boolean listenUDPReceive() throws IOException {
+      System.out.println("Ut run");
+      DatagramSocket socket1 = null;
+      DatagramSocket socket2 = null;
+      boolean res=false;
+          
+          try {
+            System.out.println(socket1);
+            if(socket1==null) {
+              socket1 = new DatagramSocket(receivePort1);
+            }
+            if(socket2==null) {
+              socket2 = new DatagramSocket(receivePort2);
+            }
+          
+             byte[] data1= new byte[1000];
+             byte[] data2= new byte[1000];
+             DatagramPacket recevPacket1 = new DatagramPacket(data1,data1.length);
+             DatagramPacket recevPacket2 = new DatagramPacket(data2,data2.length);
+             System.out.println("before receive in udpt");
+             socket1.receive(recevPacket1);
+             socket2.receive(recevPacket2);
+             System.out.println("after receive in udpt");
+             
+             
+             byte[] d=recevPacket1.getData();
+             int dlen = recevPacket1.getLength();
+             String info = new String(d,0,dlen,"UTF-8");
+             System.out.println("UDPt1"+info);
+             
+             byte[] d2=recevPacket2.getData();
+             int dlen2 = recevPacket2.getLength();
+             String info2 = new String(d2,0,dlen2,"UTF-8");
+             System.out.println("UDPt2"+info2);
+             
+             if(info.equals("Conference")) {
+               
+               this.sendData("Conference", requestPort1);
+               this.sendData("Conference", requestPort2);
+               res=true;
+             }
+        
+     
+             
+             
+          } catch ( IOException e) {
+              
+              e.printStackTrace();
+          }
+          
+          return res;
+      
+    }
+    /*
     public void regist() {
     	
     	
@@ -131,7 +256,7 @@ public class Server implements ServerOperation {
 
 			e.printStackTrace();
 		}  
-    }
+    }*/
     
     public void start() {
 	
@@ -144,6 +269,21 @@ public class Server implements ServerOperation {
                        
             System.err.println(location+"ManagerOperation"+" has blinded");                       
             System.err.println("Server "+location+" ready");
+           
+
+            Thread t = new Thread(new Runnable(){   //running thread which will request data using UDP/sockets 
+              public void run(){
+                  while(true) {
+                  try {
+                    listenUDPt();
+                  } catch (Exception e) {
+                      e.printStackTrace();
+                  }
+              }
+                  }
+          });
+          t.start();
+          
             
             
         } catch (Exception e) {
@@ -240,15 +380,15 @@ public class Server implements ServerOperation {
 	
 	@Override
 	public synchronized LinkedList<String> listEventAvailability(String managerID,String eventType) throws RemoteException {
-		
+		/*
 		if(!binded) {
 			this.regist();
 			binded=true;
-		}
+		}*/
 		
 		if(!record.containsKey(eventType))return null;
 		
-		Thread t = new Thread(new Runnable(){	//running thread which will publish record counts using UDP/sockets 
+		Thread t = new Thread(new Runnable(){	//running thread which will request data using UDP/sockets 
 			public void run(){
 				//while(true) {
 				try {
@@ -260,6 +400,8 @@ public class Server implements ServerOperation {
 				//}
 		});
 		t.start();
+		
+
 		
 		LinkedList<String> res= new LinkedList<String>();
 		
@@ -287,7 +429,7 @@ public class Server implements ServerOperation {
 				res.add(ts);
 			}
 		}
-
+		System.out.println(res);
 
 		serverLog.logger.info(managerID+" has listed "+eventType+" of "+location+"Server");
 		return res;
@@ -312,16 +454,45 @@ public class Server implements ServerOperation {
 	
 	public void requestData(String eventType) throws AccessException, RemoteException, NotBoundException {
 		
+	  
+	    
 		//System.out.println("targetStub1 "+targetStub1);
 		//Registry registry1 = LocateRegistry.getRegistry(targetPort1);    
 		//Registry registry2 = LocateRegistry.getRegistry(targetPort2);
 
 		//ServerOperation stub1 = (ServerOperation) registry1.lookup(targetStub1);
 		//ServerOperation stub2 = (ServerOperation) registry2.lookup(targetStub2);
-		stub1.sendData(eventType, receivePort1);
-		stub2.sendData(eventType, receivePort2);
+	    this.sendRequest(eventType, requestPort1);
+	    this.sendRequest(eventType, requestPort2);
+		//stub1.sendData(eventType, receivePort1);
+		//stub2.sendData(eventType, receivePort2);
+		//stub2.sendData(eventType, listenPort1);
 		
-		
+	}
+	
+	public void sendRequest(String eventType,int targetPort) {
+	   
+	  System.out.println("sendrequest:");
+
+	        
+	        try {
+	            aSocket = new DatagramSocket();
+	            
+	            byte[] sData=eventType.getBytes();
+	            
+	            
+	            InetAddress address = InetAddress.getByName("localhost");
+	            //int port=8088;
+	            DatagramPacket sendPacket=new DatagramPacket(sData,sData.length,address,targetPort);
+	            //DatagramPacket sendPacket2=new DatagramPacket(sData,sData.length,address,targetPort2);
+	            aSocket.send(sendPacket);
+	            //aSocket.send(sendPacket2);
+	          
+	           // System.out.println(bf.toString());
+	            aSocket.close();
+	        } catch (Exception e) {         
+	            e.printStackTrace();
+	        }finally {if(aSocket != null) aSocket.close();}
 	}
 	
 	@Override
@@ -353,6 +524,10 @@ public class Server implements ServerOperation {
 		}finally {if(aSocket != null) aSocket.close();}
     	
     }
+	
+
+	
+	
     public void receiveData() {
     	try {
     		  //int receivePort=port+5000;
@@ -463,6 +638,7 @@ public class Server implements ServerOperation {
 		if(newCapacity==0)return -3;
 		else {
 			newCapacity--;
+			System.out.println("capacity"+newCapacity+" of "+eventID);
 			record.get(eventType).put(eventID, newCapacity);
 		}
 		

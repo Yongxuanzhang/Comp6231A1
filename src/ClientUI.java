@@ -301,9 +301,9 @@ public class ClientUI{
 	        	  sct = new Scanner(System.in); 
 	              System.out.println("Please Enter Event Type:"); 
 	              eventType = sct.nextLine(); 
-	              
-	              if(stub.listEventAvailability(ID,eventType)!=null) {
-	            	  System.out.println(eventType+stub.listEventAvailability(ID,eventType));
+	              LinkedList<String> res=stub.listEventAvailability(ID,eventType);
+	              if(res!=null) {
+	            	  System.out.println(eventType+res);
 	              }else {
 	               	 System.out.println("Wrong Input."); 
 	                 
