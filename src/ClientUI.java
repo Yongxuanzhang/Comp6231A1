@@ -272,11 +272,11 @@ public class ClientUI{
 	            }
 	            
 	            if(stub.addEvent(ID, eventID, eventType, bookingCapacity)) {
-	                System.out.println("Booked successfully."); 
+	                System.out.println("Added successfully."); 
 	                
 	                return true;
 	            }else {
-	            	 System.out.println("Wrong Input."); 
+	            	 System.out.println("You can not add event to other cities."); 
 	                 
 	            	 return false;
 	            }

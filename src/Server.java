@@ -145,9 +145,9 @@ public class Server implements ServerOperation {
             //}
           
              byte[] data1= new byte[1000];
-             byte[] data2= new byte[1000];
+            // byte[] data2= new byte[1000];
              DatagramPacket recevPacket1 = new DatagramPacket(data1,data1.length);
-             DatagramPacket recevPacket2 = new DatagramPacket(data2,data2.length);
+            // DatagramPacket recevPacket2 = new DatagramPacket(data2,data2.length);
              System.out.println("before receive in udpt");
              socket1.receive(recevPacket1);
             // socket2.receive(recevPacket2);
@@ -159,9 +159,9 @@ public class Server implements ServerOperation {
              String info = new String(d,0,dlen,"UTF-8");
              System.out.println("UDPt1"+info);
              
-             byte[] d2=recevPacket2.getData();
-             int dlen2 = recevPacket2.getLength();
-             String info2 = new String(d2,0,dlen2,"UTF-8");
+             //byte[] d2=recevPacket2.getData();
+             //int dlen2 = recevPacket2.getLength();
+             //String info2 = new String(d2,0,dlen2,"UTF-8");
              //System.out.println("UDPt2"+info2);
              
              if(info.equals("Conference")||info.equals("Seminars")||info.equals("Trade shows")) {
@@ -170,9 +170,18 @@ public class Server implements ServerOperation {
                this.sendData(info, targetPort2);
                res=true;
              }
+             else if(info.substring(0, 3).equals(location)) {
+            	 System.out.println("UDPt"+info);
+            	 //eventID-CustomerID-EventType
+            	  String[] bookInfo=info.split("-");
+            	  this.bookEvent(bookInfo[1], bookInfo[0], bookInfo[2]);
+            	 
+             }
         
              //Change to UDP.
              //TODO:1.book event from other server(Modity stub).2.
+             
+             
              
              
           } catch ( IOException e) {
@@ -187,7 +196,7 @@ public class Server implements ServerOperation {
       
     }
 
-    
+    /*
     public boolean listenUDPReceive() throws IOException {
       System.out.println("Ut run");
       DatagramSocket socket1 = null;
@@ -230,7 +239,7 @@ public class Server implements ServerOperation {
                res=true;
              }
         
-     
+  
              
              
           } catch ( IOException e) {
@@ -241,7 +250,7 @@ public class Server implements ServerOperation {
           return res;
       
     }
-    /*
+
     public void regist() {
     	
     	
@@ -264,7 +273,8 @@ public class Server implements ServerOperation {
            	Server obj = new Server(location,port,record);     
         	ServerOperation stub = (ServerOperation) UnicastRemoteObject.exportObject(obj, 0);
            	
-           	registry = LocateRegistry.getRegistry(port);                     
+           	registry = LocateRegistry.getRegistry(port);  
+        	//registry = LocateRegistry.createRegistry(port);
             registry.rebind(location+"ManagerOperation", stub);
                        
             System.err.println(location+"ManagerOperation"+" has blinded");                       
@@ -470,6 +480,35 @@ public class Server implements ServerOperation {
 		
 	}
 	
+
+	public void sendRequest2(String eventID,String CustomerID,String eventType,int targetPort) {
+		   
+		  System.out.println("sendrequest2:");
+
+		        
+		        try {
+		            aSocket = new DatagramSocket();
+		            
+		            
+		            String bookInfo=eventID+"-"+CustomerID+"-"+eventType;
+		            byte[] sData=bookInfo.getBytes();
+		            
+		            System.out.println("send:"+bookInfo);
+		            InetAddress address = InetAddress.getByName("localhost");
+		            //int port=8088;
+		            DatagramPacket sendPacket=new DatagramPacket(sData,sData.length,address,targetPort);
+		            //DatagramPacket sendPacket2=new DatagramPacket(sData,sData.length,address,targetPort2);
+		            aSocket.send(sendPacket);
+		            //aSocket.send(sendPacket2);
+		          
+		           // System.out.println(bf.toString());
+		            aSocket.close();
+		        } catch (Exception e) {         
+		            e.printStackTrace();
+		        }finally {if(aSocket != null) aSocket.close();}
+		}
+	
+	
 	public void sendRequest(String eventType,int targetPort) {
 	   
 	  System.out.println("sendrequest:");
@@ -567,6 +606,7 @@ public class Server implements ServerOperation {
 	public synchronized int bookEvent(String customerID, String eventID, String eventType) throws RemoteException {
 		
 		
+		
 		/**
 		 * use error code for return:
 		 * -1:Book more than 3 events in 1 month from other servers;
@@ -574,6 +614,7 @@ public class Server implements ServerOperation {
 		 * -3:The capacity is full;
 		 * -4:Location Error;
 		 * -5:Event doesn't exist;
+		 * -6:EventType doesn't exist;
 		 * 
 		 */
 		//userSchedule.addAll(customerID, eventID);
@@ -583,6 +624,28 @@ public class Server implements ServerOperation {
 		
 		System.out.println(customerID);
 		System.out.println(userSchedule.containsKey(customerID)+" -- ");
+		
+		
+		if(!eventID.substring(0, 3).equals(location)) {
+			
+			//this.sendRequest2(eventID,customerID,eventType,targetPort1);
+			//this.sendRequest2(eventID,customerID,eventType,targetPort2);
+			
+			
+			Thread t = new Thread(new Runnable(){	//running thread which will request data using UDP/sockets 
+				public void run(){
+					//requestData(eventType);
+					sendRequest2(eventID,customerID,eventType,requestPort1);
+					sendRequest2(eventID,customerID,eventType,requestPort2);
+				}
+					//}
+			});
+			t.start();
+			
+			this.insertEvent(customerID, eventID, eventType);
+			return 1;
+		}
+		
 		
 		if(!record.containsKey(eventType))return -6;
 	
@@ -642,20 +705,28 @@ public class Server implements ServerOperation {
 			record.get(eventType).put(eventID, newCapacity);
 		}
 		
+	
+		
+		
 		insertEvent(customerID,eventID,eventType);
 			
 		return 1;
 	}
 
 	public void insertEvent(String customerID,String eventID,String  eventType) {
-		if(userSchedule.containsKey(customerID)) {
-			userSchedule.get(customerID).add(eventType+" "+eventID);
+		
+		if(customerID.substring(0, 3).equals(location)) {
+			if(userSchedule.containsKey(customerID)) {
+				userSchedule.get(customerID).add(eventType+" "+eventID);
+				
+			}else {
+				LinkedList<String> usTemp= new LinkedList<String>();
+				usTemp.add(eventType+" "+eventID);		
+				userSchedule.put(customerID, usTemp);
+			}
 			
-		}else {
-			LinkedList<String> usTemp= new LinkedList<String>();
-			usTemp.add(eventType+" "+eventID);		
-			userSchedule.put(customerID, usTemp);
 		}
+
 	}
 
 	public synchronized boolean cancelEvent(String eventID,String eventType, String customerID) throws RemoteException {
