@@ -33,32 +33,32 @@ public class Server implements ServerOperation {
 	private HashMap<String,HashMap<String,Integer>> record=new HashMap<String,HashMap<String,Integer>>();
 	private HashMap<String,LinkedList<String>> userSchedule=new HashMap<String,LinkedList<String>>();
 	private int port;
+	//used for transmit data
 	private int receivePort1;
 	private int receivePort2;
 	private int requestPort1;
 	private int requestPort2;
+	
 	private int listenPort1;
 	private int listenPort2;
 	private int targetPort1;
 	private int targetPort2;
+	private int sendbackport1;
+	//private int sendbackport2;
 	private String targetStub1;
 	private String targetStub2;
 	private DatagramSocket aSocket1;
 	private DatagramSocket aSocket2;
-    private DatagramSocket aSocket3=null;
-    private DatagramSocket aSocket4=null;
 	private String location;
-	private String sendEventType;
 	private Registry registry;
-	private Registry registry1;    
-	private Registry registry2;
 	private Log serverLog;
 	private ServerOperation stub1;
 	private ServerOperation stub2;
 	private String[] receiveList1=null;
 	private String[] receiveList2=null;
-	private boolean binded=false;
-
+	//private boolean binded=false;
+	private int feedback=1;
+	private boolean fromThis=true;
 
 	private DatagramSocket aSocket = null;
 	private FileOutputStream fileOutputStream = null;
@@ -97,24 +97,24 @@ public class Server implements ServerOperation {
     	switch(port){
  
     	case 2002:
-    		this.targetStub1="OTWManagerOperation";
-    		this.targetStub2="TORManagerOperation"; 
+    		//this.targetStub1="OTWManagerOperation";
+    		//this.targetStub2="TORManagerOperation"; 
     		targetPort1=5003;
-    		targetPort2=5007;
+    		targetPort2=5004;
     		requestPort1=6003;
     		requestPort2=6004;
     		break;
     	case 2003:
-    		this.targetStub1="MTLManagerOperation";
-    		this.targetStub2="TORManagerOperation";
+    		//this.targetStub1="MTLManagerOperation";
+    		//this.targetStub2="TORManagerOperation";
     		targetPort1=5002;
     		targetPort2=5009;
             requestPort1=6002;
             requestPort2=6004;
     		break;	
     	case 2004:
-    		this.targetStub1="OTWManagerOperation";
-    		this.targetStub2="MTLManagerOperation";
+    		//this.targetStub1="OTWManagerOperation";
+    		//this.targetStub2="MTLManagerOperation";
     		targetPort1=5007;
     		targetPort2=5008;
             requestPort1=6002;
@@ -164,8 +164,9 @@ public class Server implements ServerOperation {
              //String info2 = new String(d2,0,dlen2,"UTF-8");
              //System.out.println("UDPt2"+info2);
              
+             
              if(info.equals("Conference")||info.equals("Seminars")||info.equals("Trade shows")) {
-               
+            	 System.out.println("INsidetheIF"+info);
                this.sendData(info, targetPort1);
                this.sendData(info, targetPort2);
                res=true;
@@ -173,11 +174,16 @@ public class Server implements ServerOperation {
              else if(info.substring(0, 3).equals(location)) {
             	 System.out.println("UDPt"+info);
             	 //eventID-CustomerID-EventType
+            	 
             	  String[] bookInfo=info.split("-");
+            	  fromThis=false;
+            	  sendbackport1=Integer.parseInt(bookInfo[3]);
             	  this.bookEvent(bookInfo[1], bookInfo[0], bookInfo[2]);
             	 
+            	 
              }
-        
+           
+             feedback=Integer.parseInt(info); 
              //Change to UDP.
              //TODO:1.book event from other server(Modity stub).2.
              
@@ -313,7 +319,7 @@ public class Server implements ServerOperation {
     }
     
 	@Override
-	public boolean addEvent(String managerID, String eventID, String eventType, Integer bookingCapacity)throws RemoteException {
+	public synchronized boolean addEvent(String managerID, String eventID, String eventType, Integer bookingCapacity)throws RemoteException {
 		HashMap<String,Integer> rec=new HashMap<String,Integer>();
 		
 		
@@ -490,7 +496,7 @@ public class Server implements ServerOperation {
 		            aSocket = new DatagramSocket();
 		            
 		            
-		            String bookInfo=eventID+"-"+CustomerID+"-"+eventType;
+		            String bookInfo=eventID+"-"+CustomerID+"-"+eventType+"-"+listenPort2;
 		            byte[] sData=bookInfo.getBytes();
 		            
 		            System.out.println("send:"+bookInfo);
@@ -603,6 +609,70 @@ public class Server implements ServerOperation {
     	
     }
 	
+    public void sendBack(int back) {
+    	
+    	
+		  System.out.println("sendback");
+
+	        
+	        try {
+	            aSocket = new DatagramSocket();
+	            
+	            
+	            String bookInfo=Integer.toString(back);
+	            byte[] sData=bookInfo.getBytes();
+	            
+	            System.out.println("send:"+bookInfo);
+	            InetAddress address = InetAddress.getByName("localhost");
+	            //int port=8088;
+	            DatagramPacket sendPacket=new DatagramPacket(sData,sData.length,address,sendbackport1);
+	         
+	            aSocket.send(sendPacket);
+
+	            aSocket.close();
+	        } catch (Exception e) {         
+	            e.printStackTrace();
+	        }finally {if(aSocket != null) aSocket.close();}
+    	
+    }
+    
+    
+    public int listenFeedBack() {
+        //System.out.println("Ut run");
+
+       
+            try {
+       
+                socket1 = new DatagramSocket(listenPort2);
+                
+       
+            
+               byte[] data1= new byte[1000];    
+               DatagramPacket recevPacket1 = new DatagramPacket(data1,data1.length);   
+               System.out.println("before receive in udpfb");
+               socket1.receive(recevPacket1);
+               System.out.println("after receive in udpfb");
+               
+               
+               byte[] d=recevPacket1.getData();
+               int dlen = recevPacket1.getLength();
+               String info = new String(d,0,dlen,"UTF-8");
+               System.out.println("UDPfeedback"+info);
+
+               feedback=Integer.parseInt(info); 
+               System.out.println("feedback is "+feedback);
+             
+            } catch ( IOException e) {
+                
+                e.printStackTrace();
+            }finally {
+              socket1.close();        
+            }
+            
+            return feedback;
+        
+      }
+    
 	public synchronized int bookEvent(String customerID, String eventID, String eventType) throws RemoteException {
 		
 		
@@ -632,25 +702,40 @@ public class Server implements ServerOperation {
 			//this.sendRequest2(eventID,customerID,eventType,targetPort2);
 			
 			
-			Thread t = new Thread(new Runnable(){	//running thread which will request data using UDP/sockets 
-				public void run(){
+		//	Thread t = new Thread(new Runnable(){	//running thread which will request data using UDP/sockets 
+		//		public void run(){
 					//requestData(eventType);
 					sendRequest2(eventID,customerID,eventType,requestPort1);
 					sendRequest2(eventID,customerID,eventType,requestPort2);
-				}
+					feedback=listenFeedBack();
+					System.out.println("feedback value in thread"+feedback);
+				
+	//			}
 					//}
-			});
-			t.start();
+		//	});
+		//	t.start();
 			
-			this.insertEvent(customerID, eventID, eventType);
-			return 1;
+			//TODO
+			
+			
+			
+			//sendBack();
+			//feedback=listenFeedBack();
+			if(feedback==1) {
+				this.insertEvent(customerID, eventID, eventType);
+			}
+			System.out.println("feedback value "+feedback);
+			return feedback;
 		}
 		
-		
-		if(!record.containsKey(eventType))return -6;
+		System.out.println("send back in book 1");
+		if(!record.containsKey(eventType)) {
+			sendBack(-6);
+			return -6;
+		}
 	
 		
-	
+		System.out.println("send back in book 2");
 		String eventLoc= eventID.substring(0, 3);
 		
 		if(eventLoc.equals(location)!=true) {
@@ -668,7 +753,10 @@ public class Server implements ServerOperation {
 				return tempReturn;
 				 
 			}
-			else return -4;
+			else {
+				sendBack(-4);
+				return -4;
+			}
 		}
 		if(!record.get(eventType).containsKey(eventID))return -5;
 		int checkTimes=0;
@@ -678,7 +766,10 @@ public class Server implements ServerOperation {
 			checkTimes++;
 			}
 		}
-		if(checkTimes>=3)return -1;
+		if(checkTimes>=3) {
+			sendBack(-1);
+			return -1;
+		}
 	
 		//if(userSchedule.containsKey(customerID)&&userSchedule.get(customerID).contains(eventID)) return -1;
 		//if(record.get(eventType).containsKey(eventID))return -2;
@@ -689,16 +780,21 @@ public class Server implements ServerOperation {
 	            for(String s:userSchedule.get(customerID)) {
 	                
 	                if(s.equals(eventType+" "+eventID)) {
+	            		sendBack(-2);
 	                    return -2;
 	                }
 	            }
 
 	        }
-		
+			System.out.println("send back in book 3");
 		
 		//check capacity	
 		int newCapacity=record.get(eventType).get(eventID);
-		if(newCapacity==0)return -3;
+		if(newCapacity==0) {
+			
+			sendBack(-3);
+			return -3;
+		}
 		else {
 			newCapacity--;
 			System.out.println("capacity"+newCapacity+" of "+eventID);
@@ -709,7 +805,8 @@ public class Server implements ServerOperation {
 		
 		
 		insertEvent(customerID,eventID,eventType);
-			
+		System.out.println("send back in book 4");
+		sendBack(1);
 		return 1;
 	}
 
