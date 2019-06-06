@@ -79,8 +79,8 @@ public class Server implements ServerOperation {
     	//Location="MTL";
     	this.location=location;
     	this.port=port;
-    	this.serverLog= new Log(location+"serverOperation.txt");
-    	serverFile= new File(location+"-serverOperation.txt");
+    	//this.serverLog= new Log(location+"serverOperation.txt");
+    	serverFile= new File(location+"-serverOperationLog.txt");
     	 if(!serverFile.exists()){
     		 serverFile.createNewFile();
          }
@@ -184,7 +184,7 @@ public class Server implements ServerOperation {
              
              if(info.substring(0, 3).equals(location)) {
                try {
-                 Thread.sleep(50);
+                 Thread.sleep(500);
                } catch (InterruptedException e) {
                  // TODO Auto-generated catch block
                  e.printStackTrace();
@@ -201,7 +201,7 @@ public class Server implements ServerOperation {
              }
              if(info2.substring(0, 3).equals(location)) {
                try {
-                 Thread.sleep(50);
+                 Thread.sleep(500);
                } catch (InterruptedException e) {
                  // TODO Auto-generated catch block
                  e.printStackTrace();
@@ -353,7 +353,7 @@ public class Server implements ServerOperation {
                        
             System.err.println(location+"ManagerOperation"+" has blinded");                       
             System.err.println("Server "+location+" ready");
-           
+            writeFile("Server "+location+" ready");
 
             Thread t = new Thread(new Runnable(){   //running thread which will request data using UDP/sockets 
               public void run(){
@@ -378,8 +378,9 @@ public class Server implements ServerOperation {
         }
         
     public void writeFile(String info) throws IOException {
-		 fileOutputStream = new FileOutputStream(serverFile);
-		 Date date = new Date();	 
+		 fileOutputStream = new FileOutputStream(serverFile,true);
+		 Date date = new Date();	
+		 info+="\r\n";  
 	     fileOutputStream.write(info.getBytes());
 	     fileOutputStream.write(date.toString().getBytes());
 	     fileOutputStream.flush();
@@ -404,7 +405,8 @@ public class Server implements ServerOperation {
 			//serverLog.logger.info(managerID+" has added "+eventType+eventID+" of "+location+"Server.  ");
 			
 			 try {
-				 String tempWrite=managerID+" has added "+eventType+eventID+" of "+location+"Server";
+			   System.out.println("Write add in log");
+				 String tempWrite=managerID+" has added "+eventType+eventID+" of "+location+"Server ";
 				 writeFile(tempWrite);
 			} catch (Exception e) {
 
@@ -455,8 +457,14 @@ public class Server implements ServerOperation {
 	
 		
 		//System.out.println(record.get(eventType).get(eventID));
-		
-		serverLog.logger.info(ID+" has removed "+eventType+eventID+" of "+location+"Server");
+		 String tempWrite=ID+" has removed "+eventType+eventID+" of "+location+"Server ";
+         try {
+          writeFile(tempWrite);
+        } catch (IOException e) {
+       
+          e.printStackTrace();
+        }
+		//serverLog.logger.info(ID+" has removed "+eventType+eventID+" of "+location+"Server");
 		return true;
 	}
 
@@ -514,8 +522,14 @@ public class Server implements ServerOperation {
 			}
 		}
 		System.out.println(res);
-
-		serverLog.logger.info(managerID+" has listed "+eventType+" of "+location+"Server");
+        String tempWrite=managerID+" has listed "+eventType+" of "+location+"Server";
+        try {
+         writeFile(tempWrite);
+       } catch (IOException e) {
+      
+         e.printStackTrace();
+       }
+		//serverLog.logger.info(managerID+" has listed "+eventType+" of "+location+"Server");
 		return res;
 	}
 
@@ -784,6 +798,13 @@ public class Server implements ServerOperation {
 		System.out.println("send back in book 1");
 		if(!record.containsKey(eventType)) {
 			sendBack(-6);
+	         String tempWrite=customerID+" cannot book "+eventID;
+	            try {
+	             writeFile(tempWrite);
+	           } catch (IOException e) {
+	          
+	             e.printStackTrace();
+	           }
 			return -6;
 		}
 	
@@ -808,6 +829,13 @@ public class Server implements ServerOperation {
 			}
 			else {
 				sendBack(-4);
+	            String tempWrite=customerID+" cannot book "+eventID;
+	            try {
+	             writeFile(tempWrite);
+	           } catch (IOException e) {
+	          
+	             e.printStackTrace();
+	           }
 				return -4;
 			}
 		}
@@ -821,6 +849,13 @@ public class Server implements ServerOperation {
 		}
 		if(checkTimes>=3) {
 			sendBack(-1);
+	         String tempWrite=customerID+" cannot book "+eventID;
+	            try {
+	             writeFile(tempWrite);
+	           } catch (IOException e) {
+	          
+	             e.printStackTrace();
+	           }
 			return -1;
 		}
 	
@@ -834,6 +869,13 @@ public class Server implements ServerOperation {
 	                
 	                if(s.equals(eventType+" "+eventID)) {
 	            		sendBack(-2);
+	                    String tempWrite=customerID+" cannot book "+eventID;
+	                    try {
+	                     writeFile(tempWrite);
+	                   } catch (IOException e) {
+	                  
+	                     e.printStackTrace();
+	                   }
 	                    return -2;
 	                }
 	            }
@@ -845,6 +887,14 @@ public class Server implements ServerOperation {
 		int newCapacity=record.get(eventType).get(eventID);
 		if(newCapacity==0) {
 			
+	        String tempWrite=customerID+" cannot book "+eventID;
+	        try {
+	         writeFile(tempWrite);
+	       } catch (IOException e) {
+	      
+	         e.printStackTrace();
+	       }
+		  
 			sendBack(-3);
 			return -3;
 		}
@@ -859,6 +909,13 @@ public class Server implements ServerOperation {
 		
 		insertEvent(customerID,eventID,eventType);
 		System.out.println("send back in book 4");
+        String tempWrite=customerID+" has booked "+eventID;
+        try {
+         writeFile(tempWrite);
+       } catch (IOException e) {
+      
+         e.printStackTrace();
+       }
 		sendBack(1);
 		return 1;
 	}
@@ -940,6 +997,13 @@ public class Server implements ServerOperation {
       }
         this.sendBack(1);
         //this.sendBack(1);
+        String tempWrite=customerID+" canceled "+eventID;
+        try {
+         writeFile(tempWrite);
+       } catch (IOException e) {
+      
+         e.printStackTrace();
+       }
         return true;
 	  }
 	  
@@ -971,18 +1035,46 @@ public class Server implements ServerOperation {
             
             if(!result) {
               this.sendBack(0);
+              String tempWrite=customerID+" cannot cancel "+eventID;
+              try {
+               writeFile(tempWrite);
+             } catch (IOException e) {
+            
+               e.printStackTrace();
+             }
               return false;
             }
             
             this.sendBack(1);
+            String tempWrite=customerID+" canceled"+eventID;
+            try {
+             writeFile(tempWrite);
+           } catch (IOException e) {
+          
+             e.printStackTrace();
+           }
             return true;
           }else {
             this.sendBack(0);
+            String tempWrite=customerID+" cannot cancel "+eventID;
+            try {
+             writeFile(tempWrite);
+           } catch (IOException e) {
+          
+             e.printStackTrace();
+           }
             return false;
           }
 
 		}else {
 		  this.sendBack(0);
+          String tempWrite=customerID+" cannot cancel "+eventID;
+          try {
+           writeFile(tempWrite);
+         } catch (IOException e) {
+        
+           e.printStackTrace();
+         }
 			return false;
 		}
    // return false;
@@ -1024,6 +1116,13 @@ public class Server implements ServerOperation {
   @Override
 	public LinkedList<String> getBookingSchedule(String customerID) throws RemoteException {
 		// TODO Auto-generated method stub
+    String tempWrite=customerID+" get the schedule ";
+    try {
+     writeFile(tempWrite);
+   } catch (IOException e) {
+  
+     e.printStackTrace();
+   }
 		if(!userSchedule.containsKey(customerID)) {
 			return null;
 		}

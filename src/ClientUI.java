@@ -20,7 +20,7 @@ public class ClientUI{
 	private Scanner sc = new Scanner(System.in); 
     
     private ClientUI() throws SecurityException, IOException {       
-        userLog=new Log(ID+"-userLog.txt");
+       
         this.userInfoStart();
     }
     
@@ -103,27 +103,28 @@ public class ClientUI{
               
 	          if(bookRes==1) {
 	              System.out.println("Booked successfully."); 
-	              
+	              userLog.logger.info(customerID+" booked "+eventID+" successfully.");
 	              return true;
 	          }else if(bookRes==-3) {
 	          	 System.out.println("Capacity is full."); 
-	             
+	          	userLog.logger.info(customerID+" cannot book "+eventID);
 	          	 return false;
 	          }else if(bookRes==-2) {
 	          	 System.out.println("Customer "+ customerID+" Already booked this event."); 
-	             
+	          	userLog.logger.info(customerID+" has already booked"+eventID);
 	          	 return false;
 	          }else if(bookRes==-5) {
 		          	 System.out.println("Event doesn't exist"); 
-		             
+		          	 userLog.logger.info(customerID+" cannot book "+eventID);
 		          	 return false;
 	          }else if(bookRes==-6) {
 		          	 System.out.println("Wrong type"); 
-		             
+		          	 userLog.logger.info(customerID+" cannot book "+eventID);
 		          	 return false;
 		          }
 	          else {
 	        	  System.out.println("Wrong Input.");
+	        	  userLog.logger.info(customerID+" cannot book "+eventID);
 	        	  return false;
 	          }
 	     
@@ -135,7 +136,7 @@ public class ClientUI{
 	          customerID = this.ID; 
 	          if(stub.getBookingSchedule(customerID)!=null) {
 	              //System.out.println(stub.getBookingSchedule(customerID)); 
-	              
+	              userLog.logger.info(customerID+" got the schedule");
 	              for(String o:stub.getBookingSchedule(customerID)) {
 	            	     System.out.println(o); 
 	              }
@@ -143,7 +144,7 @@ public class ClientUI{
 	              return true;
 	          }else{
 	          	 System.out.println("Failure."); 
-	             
+	          	 userLog.logger.info(customerID+" cannot get the schedule");
 	          	 return false;
 	          }
         	  
@@ -157,19 +158,21 @@ public class ClientUI{
               eventType = sct.nextLine(); 	
 	          if(stub.cancelEvent(eventID,eventType,customerID)) {
 	              System.out.println("Canceled successfully."); 
-	              
+	              userLog.logger.info(customerID+" canceled "+eventID+" successfully.");
 	              return true;
 	          }else{
 	          	 System.out.println("Failure."); 
-	             
+	          	 userLog.logger.info(customerID+" cannot cancel "+eventID);
 	          	 return false;
 	          }
 
           case "E":
         	  opFlag=false;
+        	  userLog.logger.info(ID+" exit the system. ");
         	  break;
           case "e":
         	  opFlag=false;
+        	   userLog.logger.info(ID+" exit the system. ");
         	  break;
         }
         return false;
@@ -201,19 +204,19 @@ public class ClientUI{
 	              
 	              if(bookRes==1) {
 	                  System.out.println("Booked successfully."); 
-	                  
+	                  userLog.logger.info(ID+" booked "+eventID+" for "+customerID+" successfully.");
 	                  return true;
 	              }else if(bookRes==-3) {
 	                 System.out.println("Capacity is full."); 
-	                 
+	                 userLog.logger.info(ID+" cannot book "+eventID+" for "+customerID);
 	                 return false;
 	              }else if(bookRes==-2) {
 	                 System.out.println("Customer "+ customerID+" Already booked this event."); 
-	                 
+	                 userLog.logger.info(ID+" cannot book "+eventID+" for "+customerID);
 	                 return false;
 	              }else if(bookRes==-5) {
 	                     System.out.println("Event doesn't exist"); 
-	                     
+	                     userLog.logger.info(ID+" cannot book "+eventID+" for "+customerID);
 	                     return false;
 	                  }
 	          
@@ -221,6 +224,7 @@ public class ClientUI{
 	          }
 	          else {
 	        	  System.out.println("Wrong Input.");
+	        	    userLog.logger.info(ID+" cannot book "+eventID+" for "+customerID);
 	        	  return false;
 	          }
 	     
@@ -232,7 +236,7 @@ public class ClientUI{
 
 	          if(stub.getBookingSchedule(customerID)!=null) {
 	              //System.out.println(stub.getBookingSchedule(customerID)); 
-	              
+	              userLog.logger.info(customerID+" got the schedule");
 	              for(String o:stub.getBookingSchedule(customerID)) {
 	            	     System.out.println(o); 
 	              }
@@ -240,7 +244,7 @@ public class ClientUI{
 	              return true;
 	          }else{
 	          	 System.out.println("Failure."); 
-	             
+	          	userLog.logger.info(customerID+" cannot get the schedule");
 	          	 return false;
 	          }
         	  
@@ -255,11 +259,11 @@ public class ClientUI{
               
 	          if(stub.cancelEvent(eventID,eventType,customerID)) {
 	              System.out.println("Canceled successfully."); 
-	              
+	              userLog.logger.info(customerID+" canceled "+eventID+" successfully.");
 	              return true;
 	          }else{
 	          	 System.out.println("Failure."); 
-	             
+	             userLog.logger.info(customerID+" cannot cancel "+eventID);
 	          	 return false;
 	          }
           case "4":
@@ -274,17 +278,18 @@ public class ClientUI{
             
 	            if(!eventID.substring(0, 3).equals(location)) {
 	            	 //System.out.println(eventID.substring(0, 3)+" "+location); 
-	            	  System.out.println("Wrong Event ID Format."); 
+	            	  System.out.println("You cannot add events in other cities."); 
+	            	  userLog.logger.info(ID+" cannot add "+eventID);
 	            	  return false;
 	            }
 	            
 	            if(stub.addEvent(ID, eventID, eventType, bookingCapacity)) {
 	                System.out.println("Added successfully."); 
-	                
+	                userLog.logger.info(ID+" added "+eventID+" successfully.");
 	                return true;
 	            }else {
-	            	 System.out.println("You can not add event to other cities."); 
-	                 
+	            	 System.out.println("Failure."); 
+	            	 userLog.logger.info(ID+" cannot add "+eventID);
 	            	 return false;
 	            }
 	            
@@ -296,11 +301,11 @@ public class ClientUI{
 	              eventType = sct.nextLine(); 	             	              
 	              if(stub.removeEvent(ID, eventID, eventType)) {
 	                  System.out.println("Removed successfully."); 
-	                  
+	                  userLog.logger.info(ID+" removed "+eventID+" successfully.");
 	                  return true;
 	              }else {
 	              	 System.out.println("Wrong Input."); 
-	                 
+	              	userLog.logger.info(ID+" cannot remove "+eventID);
 	              	 return false;
 	              }   
 	              
@@ -311,18 +316,21 @@ public class ClientUI{
 	              LinkedList<String> res=stub.listEventAvailability(ID,eventType);
 	              if(res!=null) {
 	            	  System.out.println(eventType+res);
+	            	  userLog.logger.info(ID+" get the infomation of "+eventType);
 	              }else {
 	               	 System.out.println("Wrong Input."); 
-	                 
+	               	userLog.logger.info(ID+" cannot get the infomation of "+eventType);
 	               	 return false;
 	              }            	
 	              
 	            return true;
           case "E":
         	  opFlag=false;
+        	  userLog.logger.info(ID+" exit the system. ");
         	  break;
           case "e":
         	  opFlag=false;
+        	  userLog.logger.info(ID+" exit the system. ");
         	  break;
           
         }
@@ -382,8 +390,14 @@ public class ClientUI{
           System.out.println("Sucessfully Login in:"); 
           System.out.println("Name:"+userID+"\n");
           inRun=false;
-          
+       
           this.ID=userID;
+          try {
+            userLog=new Log(ID+"-userLog.txt");
+          } catch (SecurityException | IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
           this.login();
           String userType=userID.substring(3, 4);
 

@@ -16,7 +16,7 @@ public class Client extends Thread {
 	
     private Client(String ID) throws SecurityException, IOException {
     	this.ID=ID;
-    	userLog=new Log("Logs."+ID+"-userLog.txt");
+    	userLog=new Log(ID+"-userLog.txt");
     	//this.host=host;
     	//this.bindobj=bindobj;
     }
@@ -81,18 +81,40 @@ public class Client extends Thread {
     	int res=stub.bookEvent(customerID, eventID, eventType);
     	//System.out.println("booked "+res);
     	 if(res==1){
-         	  System.out.println(customerID+"booked "+eventID+" successfully!");
-          	  
+         	  System.out.println(customerID+" booked "+eventID+" successfully!");
+         	  userLog.logger.info(customerID+" has booked "+eventID+ " successfully!");
          }else if(res==-2) {
         	  System.out.println(customerID+" has already booked"+eventID);
+        	  userLog.logger.info(customerID+" has already booked"+eventID);
          }
          else if(res==-3) {
        	  System.out.println(ID+" :The capacity of "+eventID+" is full");
+       	 userLog.logger.info(customerID+" cannot book "+eventID);
         }
     	 else {
            System.out.println("Failure Code:"+res);
          }
     }
+    
+    
+    public void callAddEvent(String customerID,String eventID,String eventType,int Capacity) throws RemoteException {
+      
+      if(!customerID.substring(0, 3).equals(eventID.substring(0, 3))) {
+        System.out.println(customerID+" cannot add "+eventID+" from other cities");
+        userLog.logger.info(customerID+" cannot add "+eventID);
+      }else {
+        boolean res=stub.addEvent(customerID, eventID, eventType, Capacity);
+        if(res) {
+          System.out.println(customerID+" has added "+eventID+" successfully!");
+          userLog.logger.info(customerID+" has added "+eventID+ " successfully!");
+        }else {
+          userLog.logger.info(customerID+" cannot add "+eventID);
+        }
+      }
+      
+
+    }
+    
     
     public void managerOperation() {
 
@@ -101,16 +123,17 @@ public class Client extends Thread {
         System.out.println("response from server:" + response2);
         
         
-        if(stub.addEvent(ID,"OTWA100619", "Conference", 50)) {
-        	userLog.logger.info(ID+" has added"+" OTWA100619-"+ "Conference-"+ 50);
-        }else {
-        	
-        }
+
         
-        System.out.println(stub.addEvent(ID,"OTWA090619", "Conference", 50));
-        System.out.println(stub.addEvent(ID,"TORM100719","Conference",323));
-        System.out.println(stub.addEvent(ID,"OTWA101519","Seminars",43));
-        System.out.println(stub.addEvent(ID,"MTLA110519","Conference",2));
+        
+        callAddEvent(ID,"OTWA090619", "Conference", 50);
+        callAddEvent(ID,"TORM100719","Conference",323);
+        callAddEvent(ID,"OTWA101519","Seminars",43);
+        callAddEvent(ID,"MTLA110519","Conference",2);
+        //stub.addEvent(ID,"OTWA090619", "Conference", 50);
+        //stub.addEvent(ID,"TORM100719","Conference",323);
+        //stub.addEvent(ID,"OTWA101519","Seminars",43);
+        //stub.addEvent(ID,"MTLA110519","Conference",2);
      
  
         System.out.println(stub.listEventAvailability(ID,"Conference"));  
