@@ -444,7 +444,10 @@ public class Server implements ServerOperation {
 				
 				if(userSchedule.get(entry.getKey())!=null) {
 					 for(String o:userSchedule.get(entry.getKey())) {
-							if(eventID.equals(o)) {
+					   System.out.println("userschedule"+o);
+					   String[] comaperEvent=o.split(" ");
+					   System.out.println("userschedule eventID"+comaperEvent[1]);
+							if(eventID.equals(comaperEvent[1])) {
 								userSchedule.get(entry.getKey()).remove(o);
 							}
 						 }
