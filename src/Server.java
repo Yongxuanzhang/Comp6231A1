@@ -145,11 +145,12 @@ public class Server implements ServerOperation {
             //}
           
              byte[] data1= new byte[1000];
-            // byte[] data2= new byte[1000];
+             byte[] data2= new byte[1000];
              DatagramPacket recevPacket1 = new DatagramPacket(data1,data1.length);
-            // DatagramPacket recevPacket2 = new DatagramPacket(data2,data2.length);
+             DatagramPacket recevPacket2 = new DatagramPacket(data2,data2.length);
              System.out.println("before receive in udpt");
              socket1.receive(recevPacket1);
+             socket1.receive(recevPacket2);
             // socket2.receive(recevPacket2);
              System.out.println("after receive in udpt");
              
@@ -159,44 +160,98 @@ public class Server implements ServerOperation {
              String info = new String(d,0,dlen,"UTF-8");
              System.out.println("UDPt1"+info);
              
-             //byte[] d2=recevPacket2.getData();
-             //int dlen2 = recevPacket2.getLength();
-             //String info2 = new String(d2,0,dlen2,"UTF-8");
-             //System.out.println("UDPt2"+info2);
+             byte[] d2=recevPacket2.getData();
+             int dlen2 = recevPacket2.getLength();
+             String info2 = new String(d2,0,dlen2,"UTF-8");
+             System.out.println("UDPt2"+info2);
              
+
              
              if(info.equals("Conference")||info.equals("Seminars")||info.equals("Trade shows")) {
+  
             	 System.out.println("INsidetheIF"+info);
                this.sendData(info, targetPort1);
                this.sendData(info, targetPort2);
                res=true;
              }
-             else if(info.substring(0, 3).equals(location)) {
+             if(info2.equals("Conference")||info2.equals("Seminars")||info2.equals("Trade shows")) {
+               
+               System.out.println("INsidetheIF2"+info2);
+             this.sendData(info2, targetPort1);
+             this.sendData(info2, targetPort2);
+             res=true;
+           }
+             
+             if(info.substring(0, 3).equals(location)) {
+               try {
+                 Thread.sleep(50);
+               } catch (InterruptedException e) {
+                 // TODO Auto-generated catch block
+                 e.printStackTrace();
+               }
             	 System.out.println("UDPt"+info);
             	 //eventID-CustomerID-EventType
             	 
             	  String[] bookInfo=info.split("-");
             	  fromThis=false;
             	  sendbackport1=Integer.parseInt(bookInfo[3]);
-            	  this.bookEvent(bookInfo[1], bookInfo[0], bookInfo[2]);
-            	 
-            	 
+                  if(bookInfo[4].equals("1")) {
+                    this.bookEvent(bookInfo[1], bookInfo[0], bookInfo[2]); 
+                  }    	 
              }
-             else if(info.substring(0, 6).equals("cancel")) {
+             if(info2.substring(0, 3).equals(location)) {
+               try {
+                 Thread.sleep(50);
+               } catch (InterruptedException e) {
+                 // TODO Auto-generated catch block
+                 e.printStackTrace();
+               }
+               System.out.println("UDPt2"+info2);
+               //eventID-CustomerID-EventType
+               
+                String[] bookInfo=info2.split("-");
+                fromThis=false;
+                sendbackport1=Integer.parseInt(bookInfo[3]);
+                if(bookInfo[4].equals("1")) {
+                  this.bookEvent(bookInfo[1], bookInfo[0], bookInfo[2]); 
+                }
+                      
+           }
+             if(info.substring(0, 6).equals("cancel")) {
                 System.out.println("UDPcancel--"+info);        
                 String[] bookInfo=info.split("-");
                 //String cancelInfo="cancel-"+eventID+"-"+customerID+"-"+eventType+"-"+listenPort2;
                 sendbackport1=Integer.parseInt(bookInfo[4]);
                 //this.cancelEvent(eventID, eventType, customerID)
                 if(bookInfo[1].substring(0, 3).equals(location)) {
-                  System.out.println("excute cancel--");   
+                 
                   cancelOther=true;
-                  this.cancelEvent(bookInfo[1], bookInfo[3], bookInfo[2]);
+                  if(bookInfo[5].equals("1")) {
+                    System.out.println("excute cancel--");   
+                    this.cancelEvent(bookInfo[1], bookInfo[3], bookInfo[2]);
+                  }
                 }
                 
              }
+             if(info2.substring(0, 6).equals("cancel")) {
+               System.out.println("UDPcancel--"+info2);        
+               String[] bookInfo=info2.split("-");
+               //String cancelInfo="cancel-"+eventID+"-"+customerID+"-"+eventType+"-"+listenPort2;
+               sendbackport1=Integer.parseInt(bookInfo[4]);
+               //this.cancelEvent(eventID, eventType, customerID)
+               if(bookInfo[1].substring(0, 3).equals(location)) {
+                 
+                 cancelOther=true;
+                 if(bookInfo[5].equals("1")) {
+                   System.out.println("excute cancel--");   
+                   this.cancelEvent(bookInfo[1], bookInfo[3], bookInfo[2]);
+                 }
+                
+               }
+               
+            }
            
-             feedback=Integer.parseInt(info); 
+               //feedback=Integer.parseInt(info); 
              //Change to UDP.
              //TODO:1.book event from other server(Modity stub).2.
              
@@ -208,7 +263,7 @@ public class Server implements ServerOperation {
               e.printStackTrace();
           }finally {
             socket1.close();
-            listenUDPt();
+           // listenUDPt();
           }
           
           return res;
@@ -311,8 +366,8 @@ public class Server implements ServerOperation {
               }
                   }
           });
+
           t.start();
-          
             
             
         } catch (Exception e) {
@@ -493,6 +548,8 @@ public class Server implements ServerOperation {
 		//ServerOperation stub2 = (ServerOperation) registry2.lookup(targetStub2);
 	    this.sendRequest(eventType, requestPort1);
 	    this.sendRequest(eventType, requestPort2);
+	    this.sendRequest(eventType, requestPort1);
+	    this.sendRequest(eventType, requestPort2);
 		//stub1.sendData(eventType, receivePort1);
 		//stub2.sendData(eventType, receivePort2);
 		//stub2.sendData(eventType, listenPort1);
@@ -500,7 +557,7 @@ public class Server implements ServerOperation {
 	}
 	
 
-	public void sendRequest2(String eventID,String CustomerID,String eventType,int targetPort) {
+	public void sendRequest2(String eventID,String CustomerID,String eventType,int targetPort,String flag) {
 		   
 		  System.out.println("sendrequest2:");
 
@@ -509,7 +566,7 @@ public class Server implements ServerOperation {
 		            aSocket = new DatagramSocket();
 		            
 		            
-		            String bookInfo=eventID+"-"+CustomerID+"-"+eventType+"-"+listenPort2;
+		            String bookInfo=eventID+"-"+CustomerID+"-"+eventType+"-"+listenPort2+"-"+flag;
 		            byte[] sData=bookInfo.getBytes();
 		            
 		            System.out.println("send:"+bookInfo);
@@ -530,7 +587,7 @@ public class Server implements ServerOperation {
 	
 	public void sendRequest(String eventType,int targetPort) {
 	   
-	  System.out.println("sendrequest:");
+	  System.out.println("sendrequest:"+eventType+targetPort);
 
 	        
 	        try {
@@ -635,7 +692,7 @@ public class Server implements ServerOperation {
 	            String bookInfo=Integer.toString(back);
 	            byte[] sData=bookInfo.getBytes();
 	            
-	            System.out.println("send:"+bookInfo);
+	            System.out.println("send:"+bookInfo+"-port"+sendbackport1);
 	            InetAddress address = InetAddress.getByName("localhost");
 	            //int port=8088;
 	            DatagramPacket sendPacket=new DatagramPacket(sData,sData.length,address,sendbackport1);
@@ -708,8 +765,11 @@ public class Server implements ServerOperation {
 		if(!eventID.substring(0, 3).equals(location)) {
 			
 
-					sendRequest2(eventID,customerID,eventType,requestPort1);
-					sendRequest2(eventID,customerID,eventType,requestPort2);
+					sendRequest2(eventID,customerID,eventType,requestPort1,"1");
+					sendRequest2(eventID,customerID,eventType,requestPort2,"1");
+	                sendRequest2(eventID,customerID,eventType,requestPort1,"2");
+	                sendRequest2(eventID,customerID,eventType,requestPort2,"2");
+
 					feedback=listenFeedBack();
 					System.out.println("feedback value in thread"+feedback);
 				
@@ -830,8 +890,10 @@ public class Server implements ServerOperation {
             userSchedule.get(customerID).remove(eventType+" "+eventID);
             
             
-            sendcancelRequest(eventID,customerID,eventType,requestPort1);
-            sendcancelRequest(eventID,customerID,eventType,requestPort2);
+            sendcancelRequest(eventID,customerID,eventType,requestPort1,"1");
+            sendcancelRequest(eventID,customerID,eventType,requestPort2,"1");
+            sendcancelRequest(eventID,customerID,eventType,requestPort1,"2");
+            sendcancelRequest(eventID,customerID,eventType,requestPort2,"2");
             feedback=listenFeedBack();
             System.out.println("feedback value in thread"+feedback);
         
@@ -841,6 +903,7 @@ public class Server implements ServerOperation {
               
             if(!result) {
               this.sendBack(0);
+              //this.sendBack(0);
               return false;
             }
             
@@ -876,6 +939,7 @@ public class Server implements ServerOperation {
           }
       }
         this.sendBack(1);
+        //this.sendBack(1);
         return true;
 	  }
 	  
@@ -927,7 +991,7 @@ public class Server implements ServerOperation {
 	
 
 	private void sendcancelRequest(String eventID, String customerID, String eventType,
-      int requestPort) {
+      int requestPort,String flag) {
       
      System.out.println("sendcancelrequest:");
 
@@ -936,7 +1000,7 @@ public class Server implements ServerOperation {
                aSocket = new DatagramSocket();
                
                
-               String cancelInfo="cancel-"+eventID+"-"+customerID+"-"+eventType+"-"+listenPort2;
+               String cancelInfo="cancel-"+eventID+"-"+customerID+"-"+eventType+"-"+listenPort2+"-"+flag;
                byte[] sData=cancelInfo.getBytes();
                
                System.out.println("send:"+cancelInfo);

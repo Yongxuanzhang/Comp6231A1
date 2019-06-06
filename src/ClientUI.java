@@ -191,27 +191,34 @@ public class ClientUI{
 	          System.out.println("Please Enter Event Type:"); 
 	          eventType = sct.nextLine(); 
 
-	          int bookRes=stub.bookEvent(customerID, eventID, eventType);
+	          String eloc=eventID.substring(0, 3);
+	          String uloc=customerID.substring(0, 3);
+	          if(eloc.equals("MTL")||eloc.equals("OTW")||eloc.equals("TOR")||uloc.equals("MTL")||uloc.equals("OTW")||
+	              uloc.equals("TOR")||eventType.equals("Conference")||eventType.equals("Seminars")||eventType.equals("Trade shows")) {
+	            int bookRes=stub.bookEvent(customerID, eventID, eventType);
 	          
-	          //System.out.println("res is "+bookRes); 
-              
-	          if(bookRes==1) {
-	              System.out.println("Booked successfully."); 
+	            //System.out.println("res is "+bookRes); 
 	              
-	              return true;
-	          }else if(bookRes==-3) {
-	          	 System.out.println("Capacity is full."); 
-	             
-	          	 return false;
-	          }else if(bookRes==-2) {
-	          	 System.out.println("Customer "+ customerID+" Already booked this event."); 
-	             
-	          	 return false;
-	          }else if(bookRes==-5) {
-		          	 System.out.println("Event doesn't exist"); 
-		             
-		          	 return false;
-		          }
+	              if(bookRes==1) {
+	                  System.out.println("Booked successfully."); 
+	                  
+	                  return true;
+	              }else if(bookRes==-3) {
+	                 System.out.println("Capacity is full."); 
+	                 
+	                 return false;
+	              }else if(bookRes==-2) {
+	                 System.out.println("Customer "+ customerID+" Already booked this event."); 
+	                 
+	                 return false;
+	              }else if(bookRes==-5) {
+	                     System.out.println("Event doesn't exist"); 
+	                     
+	                     return false;
+	                  }
+	          
+	          
+	          }
 	          else {
 	        	  System.out.println("Wrong Input.");
 	        	  return false;
