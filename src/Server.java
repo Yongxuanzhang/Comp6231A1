@@ -279,8 +279,8 @@ public class Server implements ServerOperation {
            	Server obj = new Server(location,port,record);     
         	ServerOperation stub = (ServerOperation) UnicastRemoteObject.exportObject(obj, 0);
            	
-           	registry = LocateRegistry.getRegistry(port);  
-        	//registry = LocateRegistry.createRegistry(port);
+           	//registry = LocateRegistry.getRegistry(port);  
+        	registry = LocateRegistry.createRegistry(port);
             registry.rebind(location+"ManagerOperation", stub);
                        
             System.err.println(location+"ManagerOperation"+" has blinded");                       
@@ -830,37 +830,43 @@ public class Server implements ServerOperation {
 
 		boolean result=false;//else return false;
 		System.out.println("value of uc "+userSchedule.containsKey(customerID));
-		System.out.println("value of ucID "+userSchedule.get(customerID).contains(eventType+" "+eventID));
-		if(userSchedule.containsKey(customerID)&&userSchedule.get(customerID).contains(eventType+" "+eventID)) {
-			userSchedule.get(customerID).remove(eventType+" "+eventID);
-			
-			//userSchedule.get(customerID).re
-			for (Map.Entry<String,HashMap<String,Integer>> entry : record.entrySet()) {
-				
-				for(Map.Entry<String,Integer> entry2 : entry.getValue().entrySet()) {
-					System.out.println("value of e2 "+(entry2.getKey()));
-					
-					if(entry2.getKey().equals(eventID)) {
-						
-						//record.get(entry.getKey()).remove(eventID, entry2.getValue());
-						
-						
-						int tc=entry2.getValue()+1;
-						record.get(entry.getKey()).put(eventID, tc);
-						result=true;
-					}
-				}
-			}
-			
-			if(!result)return false;
-			
-			return true;
+		//System.out.println("value of ucID "+userSchedule.get(customerID).contains(eventType+" "+eventID));
+		
+		if(userSchedule.containsKey(customerID)) {
+          if(userSchedule.get(customerID).contains(eventType+" "+eventID)){
+            
+            userSchedule.get(customerID).remove(eventType+" "+eventID);
+            
+            //userSchedule.get(customerID).re
+            for (Map.Entry<String,HashMap<String,Integer>> entry : record.entrySet()) {
+                
+                for(Map.Entry<String,Integer> entry2 : entry.getValue().entrySet()) {
+                    System.out.println("value of e2 "+(entry2.getKey()));
+                    
+                    if(entry2.getKey().equals(eventID)) {
+                        
+                        //record.get(entry.getKey()).remove(eventID, entry2.getValue());
+                        
+                        
+                        int tc=entry2.getValue()+1;
+                        record.get(entry.getKey()).put(eventID, tc);
+                        result=true;
+                    }
+                }
+            }
+            
+            if(!result)return false;
+            
+            return true;
+          }else return false;
+
 		}else {
 			return false;
 		}
-		
+   // return false;
 		
 	}
+	
 
 	@Override
 	public LinkedList<String> getBookingSchedule(String customerID) throws RemoteException {
