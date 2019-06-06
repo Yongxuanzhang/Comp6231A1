@@ -123,24 +123,20 @@ public class Client extends Thread {
         System.out.println("response from server:" + response2);
         
         
-
+        System.out.println(stub.listEventAvailability(ID,"Conference"));  
         
         
         callAddEvent(ID,"OTWA090619", "Conference", 50);
         callAddEvent(ID,"TORM100719","Conference",323);
         callAddEvent(ID,"OTWA101519","Seminars",43);
         callAddEvent(ID,"MTLA110519","Conference",2);
-        //stub.addEvent(ID,"OTWA090619", "Conference", 50);
-        //stub.addEvent(ID,"TORM100719","Conference",323);
-        //stub.addEvent(ID,"OTWA101519","Seminars",43);
-        //stub.addEvent(ID,"MTLA110519","Conference",2);
-     
- 
-        System.out.println(stub.listEventAvailability(ID,"Conference"));  
-        callServerBookEvent(ID, "MTLA100619", "Conference");
-        System.out.println(stub.listEventAvailability(ID,"Conference"));
-
         
+        
+
+       
+        callServerBookEvent(ID, "MTLA100619", "Conference");
+        
+          
         stub.getBookingSchedule(ID);
         
         if(stub.getBookingSchedule(ID)!=null) {
@@ -149,7 +145,7 @@ public class Client extends Thread {
           }
 
         }
-
+        System.out.println(stub.listEventAvailability(ID,"Conference"));
 
         } catch (Exception e) {
             System.err.println("Client exception: " + e.toString());
@@ -158,28 +154,31 @@ public class Client extends Thread {
 	
     }
     
+    public static void demoevent() {
+      
+    }
+    
+    public static void demo1(){
+      try {
+        Client client1 = new Client("OTWM2345");
+        client1.start();
+        Client client2 = new Client("MTLM2344");
+        client2.start();
+        Client client5 = new Client("TORM2346");
+        client5.start();
+        
+        
+        
+    } catch (SecurityException | IOException e) {
+        e.printStackTrace();
+    }
+
+    }
     
     public static void main(String[] args) {
 
-
-		try {
-		    Client client1 = new Client("OTWM2345");
-	        client1.start();
-	        Client client2 = new Client("MTLM2344");
-	        client2.start();
-	        Client client3 = new Client("MTLM2345");
-	       // client3.start();
-            Client client4 = new Client("MTLM2346");
-           // client4.start();
-            Client client5 = new Client("TORM2346");
-            client5.start();
-            
-			
-			
-		} catch (SecurityException | IOException e) {
-			e.printStackTrace();
-		}
-
+          demo1();
+		
 
     }
 }

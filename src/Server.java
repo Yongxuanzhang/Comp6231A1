@@ -130,7 +130,7 @@ public class Server implements ServerOperation {
 
     
     public boolean listenUDPt() {
-      System.out.println("Ut run");
+      //System.out.println("Ut run");
 
       boolean res=false;
           
@@ -148,11 +148,11 @@ public class Server implements ServerOperation {
              byte[] data2= new byte[1000];
              DatagramPacket recevPacket1 = new DatagramPacket(data1,data1.length);
              DatagramPacket recevPacket2 = new DatagramPacket(data2,data2.length);
-             System.out.println("before receive in udpt");
+            // System.out.println("before receive in udpt");
              socket1.receive(recevPacket1);
              socket1.receive(recevPacket2);
             // socket2.receive(recevPacket2);
-             System.out.println("after receive in udpt");
+            // System.out.println("after receive in udpt");
              
              
              byte[] d=recevPacket1.getData();
