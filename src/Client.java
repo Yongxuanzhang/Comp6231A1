@@ -123,7 +123,7 @@ public class Client extends Thread {
         //System.out.println(stub.bookEvent("TORM2545", "OTWA101519", "Seminars"));
         System.out.println(stub.listEventAvailability(ID,"Conference"));  
         callServerBookEvent(ID, "MTLA100619", "Conference");
-        callServerBookEvent(ID, "OTWA100619", "Conference");
+        //callServerBookEvent(ID, "OTWA100619", "Conference");
         System.out.println(stub.listEventAvailability(ID,"Conference"));
 
         //System.out.println("BookingSchedule of "+ID+" is:");
@@ -167,7 +167,7 @@ public class Client extends Thread {
         
     	Client client1;
 		try {
-			client1 = new Client("OTWM2345");
+			client1 = new Client("OTWC2345");
 	        client1.start();
 	        Client client2 = new Client("MTLM2344");
 	        client2.start();

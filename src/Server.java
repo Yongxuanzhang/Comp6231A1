@@ -59,7 +59,7 @@ public class Server implements ServerOperation {
 	//private boolean binded=false;
 	private int feedback=1;
 	private boolean fromThis=true;
-
+	private boolean cancelOther=false;
 	private DatagramSocket aSocket = null;
 	private FileOutputStream fileOutputStream = null;
 	private File serverFile;
@@ -181,6 +181,19 @@ public class Server implements ServerOperation {
             	  this.bookEvent(bookInfo[1], bookInfo[0], bookInfo[2]);
             	 
             	 
+             }
+             else if(info.substring(0, 6).equals("cancel")) {
+                System.out.println("UDPcancel--"+info);        
+                String[] bookInfo=info.split("-");
+                //String cancelInfo="cancel-"+eventID+"-"+customerID+"-"+eventType+"-"+listenPort2;
+                sendbackport1=Integer.parseInt(bookInfo[4]);
+                //this.cancelEvent(eventID, eventType, customerID)
+                if(bookInfo[1].substring(0, 3).equals(location)) {
+                  System.out.println("excute cancel--");   
+                  cancelOther=true;
+                  this.cancelEvent(bookInfo[1], bookInfo[3], bookInfo[2]);
+                }
+                
              }
            
              feedback=Integer.parseInt(info); 
@@ -638,7 +651,6 @@ public class Server implements ServerOperation {
     
     
     public int listenFeedBack() {
-        //System.out.println("Ut run");
 
        
             try {
@@ -687,10 +699,7 @@ public class Server implements ServerOperation {
 		 * -6:EventType doesn't exist;
 		 * 
 		 */
-		//userSchedule.addAll(customerID, eventID);
-		//String[] userTemp= {customerID, eventID};
-		//userSchedule.add(userTemp);
-		
+
 		
 		System.out.println(customerID);
 		System.out.println(userSchedule.containsKey(customerID)+" -- ");
@@ -698,29 +707,13 @@ public class Server implements ServerOperation {
 		
 		if(!eventID.substring(0, 3).equals(location)) {
 			
-			//this.sendRequest2(eventID,customerID,eventType,targetPort1);
-			//this.sendRequest2(eventID,customerID,eventType,targetPort2);
-			
-			
-		//	Thread t = new Thread(new Runnable(){	//running thread which will request data using UDP/sockets 
-		//		public void run(){
-					//requestData(eventType);
+
 					sendRequest2(eventID,customerID,eventType,requestPort1);
 					sendRequest2(eventID,customerID,eventType,requestPort2);
 					feedback=listenFeedBack();
 					System.out.println("feedback value in thread"+feedback);
 				
-	//			}
-					//}
-		//	});
-		//	t.start();
-			
-			//TODO
-			
-			
-			
-			//sendBack();
-			//feedback=listenFeedBack();
+
 			if(feedback==1) {
 				this.insertEvent(customerID, eventID, eventType);
 			}
@@ -827,8 +820,68 @@ public class Server implements ServerOperation {
 	}
 
 	public synchronized boolean cancelEvent(String eventID,String eventType, String customerID) throws RemoteException {
+	  boolean result=false;//else return false;
+	     
+      if(!eventID.substring(0, 3).equals(location)) {
+        
+        if(userSchedule.containsKey(customerID)) {
+          if(userSchedule.get(customerID).contains(eventType+" "+eventID)){
+            
+            userSchedule.get(customerID).remove(eventType+" "+eventID);
+            
+            
+            sendcancelRequest(eventID,customerID,eventType,requestPort1);
+            sendcancelRequest(eventID,customerID,eventType,requestPort2);
+            feedback=listenFeedBack();
+            System.out.println("feedback value in thread"+feedback);
+        
+              if(feedback==1) {
+                  return true;
+              }//else return false;
+              
+            if(!result) {
+              this.sendBack(0);
+              return false;
+            }
+            
+            return true;
+          }else {   
+            return false;
+          }
 
-		boolean result=false;//else return false;
+        }else {        
+            return false;
+        }
+        
+        
+
+          //System.out.println("feedback value "+feedback);
+         
+      }
+      
+	  if(cancelOther) {
+	    //only update capacity
+        for (Map.Entry<String,HashMap<String,Integer>> entry : record.entrySet()) {
+          
+          for(Map.Entry<String,Integer> entry2 : entry.getValue().entrySet()) {
+              System.out.println("value of e2 "+(entry2.getKey()));
+              
+              if(entry2.getKey().equals(eventID)) {
+                            
+                System.out.println("tc ++ here");
+                  int tc=entry2.getValue()+1;
+                  record.get(entry.getKey()).put(eventID, tc);
+                  result=true;
+              }
+          }
+      }
+        this.sendBack(1);
+        return true;
+	  }
+	  
+	  
+	  
+		//boolean result=false;//else return false;
 		System.out.println("value of uc "+userSchedule.containsKey(customerID));
 		//System.out.println("value of ucID "+userSchedule.get(customerID).contains(eventType+" "+eventID));
 		
@@ -844,10 +897,7 @@ public class Server implements ServerOperation {
                     System.out.println("value of e2 "+(entry2.getKey()));
                     
                     if(entry2.getKey().equals(eventID)) {
-                        
-                        //record.get(entry.getKey()).remove(eventID, entry2.getValue());
-                        
-                        
+                                  
                         int tc=entry2.getValue()+1;
                         record.get(entry.getKey()).put(eventID, tc);
                         result=true;
@@ -855,12 +905,20 @@ public class Server implements ServerOperation {
                 }
             }
             
-            if(!result)return false;
+            if(!result) {
+              this.sendBack(0);
+              return false;
+            }
             
+            this.sendBack(1);
             return true;
-          }else return false;
+          }else {
+            this.sendBack(0);
+            return false;
+          }
 
 		}else {
+		  this.sendBack(0);
 			return false;
 		}
    // return false;
@@ -868,7 +926,38 @@ public class Server implements ServerOperation {
 	}
 	
 
-	@Override
+	private void sendcancelRequest(String eventID, String customerID, String eventType,
+      int requestPort) {
+      
+     System.out.println("sendcancelrequest:");
+
+           
+           try {
+               aSocket = new DatagramSocket();
+               
+               
+               String cancelInfo="cancel-"+eventID+"-"+customerID+"-"+eventType+"-"+listenPort2;
+               byte[] sData=cancelInfo.getBytes();
+               
+               System.out.println("send:"+cancelInfo);
+               InetAddress address = InetAddress.getByName("localhost");
+               //int port=8088;
+               DatagramPacket sendPacket=new DatagramPacket(sData,sData.length,address,requestPort);
+               //DatagramPacket sendPacket2=new DatagramPacket(sData,sData.length,address,targetPort2);
+               aSocket.send(sendPacket);
+               //aSocket.send(sendPacket2);
+             
+              // System.out.println(bf.toString());
+               aSocket.close();
+           } catch (Exception e) {         
+               e.printStackTrace();
+           }finally {if(aSocket != null) aSocket.close();}
+    
+  }
+
+
+
+  @Override
 	public LinkedList<String> getBookingSchedule(String customerID) throws RemoteException {
 		// TODO Auto-generated method stub
 		if(!userSchedule.containsKey(customerID)) {
