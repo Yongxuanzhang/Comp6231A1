@@ -759,6 +759,29 @@ public class Server implements ServerOperation {
         
       }
     
+    public int checkCounts(String customerID,String eventID) {
+      
+      LinkedList<String> userRecords = userSchedule.get(customerID);
+      String month =  eventID.substring(4, 6);
+      System.out.println("Month is"+month);
+      int count = 0;
+      if(userRecords!=null) {
+        for(String o:userRecords) {
+          String[] temp=o.split(" ");
+          System.out.println("Month of temp is"+temp[1]);
+          if(month.equals(temp[1].substring(4, 6))) {
+            count++;
+          }
+        }
+      }
+
+      
+      if(count>2)return -1;
+      
+      return 0;
+    }
+    
+    
 	public synchronized int bookEvent(String customerID, String eventID, String eventType) throws RemoteException {
 		
 		
@@ -778,7 +801,37 @@ public class Server implements ServerOperation {
 		System.out.println(customerID);
 		System.out.println(userSchedule.containsKey(customerID)+" -- ");
 		
-		
+        if(userSchedule.containsKey(customerID)) {
+          
+          for(String s:userSchedule.get(customerID)) {
+              
+              if(s.equals(eventType+" "+eventID)) {
+                  sendBack(-2);
+                  String tempWrite=customerID+" cannot book "+eventID;
+                  try {
+                   writeFile(tempWrite);
+                 } catch (IOException e) {
+                
+                   e.printStackTrace();
+                 }
+                  return -2;
+              }
+          }
+
+      }
+        
+        if(checkCounts(customerID,eventID)==-1) {
+            sendBack(-1);
+             String tempWrite=customerID+" cannot book "+eventID+ "from other cities more than 3 times 1 month";
+                try {
+                 writeFile(tempWrite);
+               } catch (IOException e) {
+              
+                 e.printStackTrace();
+               }
+            return -1;
+        }
+    
 		if(!eventID.substring(0, 3).equals(location)) {
 			
 
@@ -850,40 +903,12 @@ public class Server implements ServerOperation {
 			checkTimes++;
 			}
 		}
-		if(checkTimes>=3) {
-			sendBack(-1);
-	         String tempWrite=customerID+" cannot book "+eventID;
-	            try {
-	             writeFile(tempWrite);
-	           } catch (IOException e) {
-	          
-	             e.printStackTrace();
-	           }
-			return -1;
-		}
-	
+
 		//if(userSchedule.containsKey(customerID)&&userSchedule.get(customerID).contains(eventID)) return -1;
 		//if(record.get(eventType).containsKey(eventID))return -2;
 
 		
-	      if(userSchedule.containsKey(customerID)) {
-	            
-	            for(String s:userSchedule.get(customerID)) {
-	                
-	                if(s.equals(eventType+" "+eventID)) {
-	            		sendBack(-2);
-	                    String tempWrite=customerID+" cannot book "+eventID;
-	                    try {
-	                     writeFile(tempWrite);
-	                   } catch (IOException e) {
-	                  
-	                     e.printStackTrace();
-	                   }
-	                    return -2;
-	                }
-	            }
 
-	        }
 			System.out.println("send back in book 3");
 		
 		//check capacity	

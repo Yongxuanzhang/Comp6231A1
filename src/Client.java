@@ -145,7 +145,7 @@ public class Client extends Thread {
           }
 
         }
-        System.out.println(stub.listEventAvailability(ID,"Conference"));
+        //System.out.println(stub.listEventAvailability(ID,"Conference"));
 
         } catch (Exception e) {
             System.err.println("Client exception: " + e.toString());

@@ -109,7 +109,12 @@ public class ClientUI{
 	          	 System.out.println("Capacity is full."); 
 	          	userLog.logger.info(customerID+" cannot book "+eventID);
 	          	 return false;
-	          }else if(bookRes==-2) {
+	          }else if(bookRes==-1) {
+                System.out.println(customerID+" cannot book "+eventID+ "from other cities more than 3 times 1 month"); 
+               userLog.logger.info(customerID+" cannot book "+eventID+ "from other cities more than 3 times 1 month");
+                return false;
+             }
+	          else if(bookRes==-2) {
 	          	 System.out.println("Customer "+ customerID+" Already booked this event."); 
 	          	userLog.logger.info(customerID+" has already booked"+eventID);
 	          	 return false;
@@ -210,7 +215,12 @@ public class ClientUI{
 	                 System.out.println("Capacity is full."); 
 	                 userLog.logger.info(ID+" cannot book "+eventID+" for "+customerID);
 	                 return false;
-	              }else if(bookRes==-2) {
+	              }else if(bookRes==-1) {
+	                System.out.println(customerID+" cannot book "+eventID+ "from other cities more than 3 times 1 month"); 
+	                userLog.logger.info(customerID+" cannot book "+eventID+ "from other cities more than 3 times 1 month");
+	                 return false;
+	              }
+	              else if(bookRes==-2) {
 	                 System.out.println("Customer "+ customerID+" Already booked this event."); 
 	                 userLog.logger.info(ID+" cannot book "+eventID+" for "+customerID);
 	                 return false;
